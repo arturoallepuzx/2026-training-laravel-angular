@@ -28,10 +28,14 @@ class UserFactory extends Factory
     {
         return [
             'uuid' => (string) Str::uuid(),
+            'restaurant_id' => null,
+            'role' => 'operator',
+            'image_src' => null,
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
+            'pin' => fake()->numerify('####'),
             'remember_token' => Str::random(10),
         ];
     }
