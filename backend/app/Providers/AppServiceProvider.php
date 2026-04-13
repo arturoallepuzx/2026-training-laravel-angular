@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Shared\Infrastructure\Persistence\EloquentRestaurantIdResolver;
+use App\Shared\Infrastructure\Persistence\RestaurantIdResolverInterface;
 use App\Tax\Domain\Interfaces\TaxRepositoryInterface;
 use App\Tax\Infrastructure\Persistence\Repositories\EloquentTaxRepository;
 use App\User\Domain\Interfaces\PasswordHasherInterface;
@@ -20,6 +22,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(UserRepositoryInterface::class, EloquentUserRepository::class);
         $this->app->bind(PasswordHasherInterface::class, LaravelPasswordHasher::class);
         $this->app->bind(TaxRepositoryInterface::class, EloquentTaxRepository::class);
+        $this->app->singleton(RestaurantIdResolverInterface::class, EloquentRestaurantIdResolver::class);
     }
 
     /**

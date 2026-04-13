@@ -2,8 +2,8 @@
 
 namespace App\Tax\Infrastructure\Persistence\Repositories;
 
-use App\Restaurant\Infrastructure\Persistence\Models\EloquentRestaurant;
 use App\Shared\Domain\ValueObject\Uuid;
+use App\Shared\Infrastructure\Persistence\RestaurantIdResolverInterface;
 use App\Tax\Domain\Entity\Tax;
 use App\Tax\Domain\Interfaces\TaxRepositoryInterface;
 use App\Tax\Infrastructure\Persistence\Models\EloquentTax;
@@ -12,6 +12,7 @@ class EloquentTaxRepository implements TaxRepositoryInterface
 {
     public function __construct(
         private EloquentTax $model,
+        private RestaurantIdResolverInterface $restaurantIdResolver,
     ) {}
 
     public function save(Tax $tax): void
@@ -30,7 +31,7 @@ class EloquentTaxRepository implements TaxRepositoryInterface
 
         $this->model->newQuery()->create([
             'uuid' => $tax->id()->value(),
-            'restaurant_id' => $this->resolveRestaurantId($tax->restaurantId()),
+            'restaurant_id' => $this->restaurantIdResolver->toInternalId($tax->restaurantId()),
             'name' => $tax->name()->value(),
             'percentage' => $tax->percentage()->value(),
             'created_at' => $tax->createdAt()->value(),
@@ -43,7 +44,7 @@ class EloquentTaxRepository implements TaxRepositoryInterface
         $model = $this->model->newQuery()
             ->with('restaurant')
             ->where('uuid', $id->value())
-            ->where('restaurant_id', $this->resolveRestaurantId($restaurantId))
+            ->where('restaurant_id', $this->restaurantIdResolver->toInternalId($restaurantId))
             ->first();
 
         if ($model === null) {
@@ -58,7 +59,7 @@ class EloquentTaxRepository implements TaxRepositoryInterface
     {
         $models = $this->model->newQuery()
             ->with('restaurant')
-            ->where('restaurant_id', $this->resolveRestaurantId($restaurantId))
+            ->where('restaurant_id', $this->restaurantIdResolver->toInternalId($restaurantId))
             ->get();
 
         return $models->map(fn (EloquentTax $model) => $this->toDomainEntity($model))->all();
@@ -68,7 +69,7 @@ class EloquentTaxRepository implements TaxRepositoryInterface
     {
         $this->model->newQuery()
             ->where('uuid', $id->value())
-            ->where('restaurant_id', $this->resolveRestaurantId($restaurantId))
+            ->where('restaurant_id', $this->restaurantIdResolver->toInternalId($restaurantId))
             ->delete();
     }
 
@@ -82,13 +83,5 @@ class EloquentTaxRepository implements TaxRepositoryInterface
             $model->created_at->toDateTimeImmutable(),
             $model->updated_at->toDateTimeImmutable(),
         );
-    }
-
-    private function resolveRestaurantId(Uuid $restaurantUuid): int
-    {
-        return EloquentRestaurant::query()
-            ->where('uuid', $restaurantUuid->value())
-            ->firstOrFail()
-            ->id;
     }
 }
