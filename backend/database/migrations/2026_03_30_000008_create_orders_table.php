@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
-            $table->foreignId('restaurant_id')->constrained('restaurants')->cascadeOnDelete();
+            $table->foreignId('restaurant_id')->constrained('restaurants')->restrictOnDelete();
             $table->string('status')->default('open');
-            $table->foreignId('table_id')->constrained('tables')->cascadeOnDelete();
-            $table->foreignId('opened_by_user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('table_id')->constrained('tables')->restrictOnDelete();
+            $table->foreignId('opened_by_user_id')->constrained('users')->restrictOnDelete();
             $table->foreignId('closed_by_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->integer('diners');
             $table->timestamp('opened_at');

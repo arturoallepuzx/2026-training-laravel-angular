@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('sales_lines', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
-            $table->foreignId('restaurant_id')->constrained('restaurants')->cascadeOnDelete();
-            $table->foreignId('sale_id')->constrained('sales')->cascadeOnDelete();
-            $table->foreignId('order_line_id')->constrained('order_lines')->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('restaurant_id')->constrained('restaurants')->restrictOnDelete();
+            $table->foreignId('sale_id')->constrained('sales')->restrictOnDelete();
+            $table->foreignId('order_line_id')->constrained('order_lines')->restrictOnDelete();
+            $table->foreignId('user_id')->constrained('users')->restrictOnDelete();
             $table->integer('quantity');
             $table->integer('price');
             $table->integer('tax_percentage');

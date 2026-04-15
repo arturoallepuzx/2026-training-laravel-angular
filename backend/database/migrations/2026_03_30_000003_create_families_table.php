@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('families', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
-            $table->foreignId('restaurant_id')->constrained('restaurants')->cascadeOnDelete();
+            $table->foreignId('restaurant_id')->constrained('restaurants')->restrictOnDelete();
             $table->string('name');
             $table->boolean('active')->default(true);
             $table->timestamps();

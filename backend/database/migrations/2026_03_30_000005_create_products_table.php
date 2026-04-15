@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
-            $table->foreignId('restaurant_id')->constrained('restaurants')->cascadeOnDelete();
-            $table->foreignId('family_id')->constrained('families')->cascadeOnDelete();
-            $table->foreignId('tax_id')->constrained('taxes')->cascadeOnDelete();
+            $table->foreignId('restaurant_id')->constrained('restaurants')->restrictOnDelete();
+            $table->foreignId('family_id')->constrained('families')->restrictOnDelete();
+            $table->foreignId('tax_id')->constrained('taxes')->restrictOnDelete();
             $table->string('image_src')->nullable();
             $table->string('name');
             $table->integer('price');

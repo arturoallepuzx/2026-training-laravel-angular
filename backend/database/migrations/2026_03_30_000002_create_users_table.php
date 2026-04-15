@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
-            $table->foreignId('restaurant_id')->nullable()->constrained('restaurants');
+            $table->foreignId('restaurant_id')->nullable()->constrained('restaurants')->restrictOnDelete();
             $table->string('role')->default('operator');
             $table->string('image_src')->nullable();
             $table->string('name');
