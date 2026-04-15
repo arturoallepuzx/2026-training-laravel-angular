@@ -14,11 +14,13 @@ return new class extends Migration
         Schema::create('taxes', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
-            $table->foreignId('restaurant_id')->constrained('restaurants')->cascadeOnDelete();
+            $table->foreignId('restaurant_id')->constrained('restaurants')->restrictOnDelete();
             $table->string('name');
             $table->integer('percentage');
             $table->timestamps();
             $table->softDeletes();
+
+            $table->unique(['restaurant_id', 'name', 'deleted_at']);
         });
     }
 
