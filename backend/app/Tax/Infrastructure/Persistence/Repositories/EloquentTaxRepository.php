@@ -6,6 +6,7 @@ use App\Shared\Domain\ValueObject\Uuid;
 use App\Shared\Infrastructure\Persistence\RestaurantIdResolverInterface;
 use App\Tax\Domain\Entity\Tax;
 use App\Tax\Domain\Interfaces\TaxRepositoryInterface;
+use App\Tax\Domain\ValueObject\TaxName;
 use App\Tax\Infrastructure\Persistence\Models\EloquentTax;
 
 class EloquentTaxRepository implements TaxRepositoryInterface
@@ -42,7 +43,6 @@ class EloquentTaxRepository implements TaxRepositoryInterface
     public function findById(Uuid $id, Uuid $restaurantId): ?Tax
     {
         $model = $this->model->newQuery()
-            ->with('restaurant')
             ->where('uuid', $id->value())
             ->where('restaurant_id', $this->restaurantIdResolver->toInternalId($restaurantId))
             ->first();
@@ -51,18 +51,31 @@ class EloquentTaxRepository implements TaxRepositoryInterface
             return null;
         }
 
-        return $this->toDomainEntity($model);
+        return $this->toDomainEntity($model, $restaurantId);
+    }
+
+    public function findByNameAndRestaurantId(TaxName $name, Uuid $restaurantId): ?Tax
+    {
+        $model = $this->model->newQuery()
+            ->where('name', $name->value())
+            ->where('restaurant_id', $this->restaurantIdResolver->toInternalId($restaurantId))
+            ->first();
+
+        if ($model === null) {
+            return null;
+        }
+
+        return $this->toDomainEntity($model, $restaurantId);
     }
 
     /** @return Tax[] */
     public function findAllByRestaurantId(Uuid $restaurantId): array
     {
         $models = $this->model->newQuery()
-            ->with('restaurant')
             ->where('restaurant_id', $this->restaurantIdResolver->toInternalId($restaurantId))
             ->get();
 
-        return $models->map(fn (EloquentTax $model) => $this->toDomainEntity($model))->all();
+        return $models->map(fn (EloquentTax $model) => $this->toDomainEntity($model, $restaurantId))->all();
     }
 
     public function delete(Uuid $id, Uuid $restaurantId): void
@@ -73,11 +86,11 @@ class EloquentTaxRepository implements TaxRepositoryInterface
             ->delete();
     }
 
-    private function toDomainEntity(EloquentTax $model): Tax
+    private function toDomainEntity(EloquentTax $model, Uuid $restaurantId): Tax
     {
         return Tax::fromPersistence(
             $model->uuid,
-            $model->restaurant->uuid,
+            $restaurantId->value(),
             $model->name,
             $model->percentage,
             $model->created_at->toDateTimeImmutable(),

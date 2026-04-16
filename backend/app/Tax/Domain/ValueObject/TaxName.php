@@ -31,4 +31,9 @@ class TaxName
     {
         return $this->value;
     }
+
+    public function equals(self $other): bool
+    {
+        return mb_strtolower(trim($this->value)) === mb_strtolower(trim($other->value));
+    }
 }
