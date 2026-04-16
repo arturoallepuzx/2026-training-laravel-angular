@@ -2,15 +2,26 @@
 
 namespace App\Exceptions;
 
+use App\Shared\Domain\Exception\ConflictException;
+use App\Shared\Domain\Exception\NotFoundException;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
 
 class Handler
 {
     public static function register(Exceptions $exceptions): void
     {
-        $exceptions->render(function (\DomainException $e) {
+        $exceptions->render(function (ValidationException $e) {
+            return new JsonResponse(['error' => 'The given data was invalid.', 'details' => $e->errors()], 422);
+        });
+
+        $exceptions->render(function (NotFoundException $e) {
             return new JsonResponse(['error' => $e->getMessage()], 404);
+        });
+
+        $exceptions->render(function (ConflictException $e) {
+            return new JsonResponse(['error' => $e->getMessage()], 409);
         });
 
         $exceptions->render(function (\InvalidArgumentException $e) {
