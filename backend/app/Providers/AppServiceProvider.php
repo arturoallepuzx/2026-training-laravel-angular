@@ -22,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(UserRepositoryInterface::class, EloquentUserRepository::class);
         $this->app->bind(PasswordHasherInterface::class, LaravelPasswordHasher::class);
         $this->app->bind(TaxRepositoryInterface::class, EloquentTaxRepository::class);
-        $this->app->singleton(RestaurantIdResolverInterface::class, EloquentRestaurantIdResolver::class);
+        $this->app->scoped(RestaurantIdResolverInterface::class, EloquentRestaurantIdResolver::class);
     }
 
     /**
