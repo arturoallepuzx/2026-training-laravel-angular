@@ -31,7 +31,7 @@ class CreateTax
             $taxPercentage,
         );
 
-        $this->taxRepository->save($tax);
+        $this->taxRepository->create($tax);
 
         return CreateTaxResponse::create($tax);
     }

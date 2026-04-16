@@ -43,7 +43,7 @@ class UpdateTax
             $tax->updatePercentage($taxPercentage);
         }
 
-        $this->taxRepository->save($tax);
+        $this->taxRepository->update($tax);
 
         return UpdateTaxResponse::create($tax);
     }

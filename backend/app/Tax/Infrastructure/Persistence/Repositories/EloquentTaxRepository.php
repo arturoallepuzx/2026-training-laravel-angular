@@ -16,20 +16,8 @@ class EloquentTaxRepository implements TaxRepositoryInterface
         private RestaurantIdResolverInterface $restaurantIdResolver,
     ) {}
 
-    public function save(Tax $tax): void
+    public function create(Tax $tax): void
     {
-        $existing = $this->model->newQuery()->where('uuid', $tax->id()->value())->first();
-
-        if ($existing !== null) {
-            $existing->update([
-                'name' => $tax->name()->value(),
-                'percentage' => $tax->percentage()->value(),
-                'updated_at' => $tax->updatedAt()->value(),
-            ]);
-
-            return;
-        }
-
         $this->model->newQuery()->create([
             'uuid' => $tax->id()->value(),
             'restaurant_id' => $this->restaurantIdResolver->toInternalId($tax->restaurantId()),
@@ -38,6 +26,18 @@ class EloquentTaxRepository implements TaxRepositoryInterface
             'created_at' => $tax->createdAt()->value(),
             'updated_at' => $tax->updatedAt()->value(),
         ]);
+    }
+
+    public function update(Tax $tax): void
+    {
+        $this->model->newQuery()
+            ->where('uuid', $tax->id()->value())
+            ->where('restaurant_id', $this->restaurantIdResolver->toInternalId($tax->restaurantId()))
+            ->update([
+                'name' => $tax->name()->value(),
+                'percentage' => $tax->percentage()->value(),
+                'updated_at' => $tax->updatedAt()->value(),
+            ]);
     }
 
     public function findById(Uuid $id, Uuid $restaurantId): ?Tax

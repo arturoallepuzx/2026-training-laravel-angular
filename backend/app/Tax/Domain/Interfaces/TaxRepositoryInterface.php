@@ -8,7 +8,9 @@ use App\Tax\Domain\ValueObject\TaxName;
 
 interface TaxRepositoryInterface
 {
-    public function save(Tax $tax): void;
+    public function create(Tax $tax): void;
+
+    public function update(Tax $tax): void;
 
     public function findById(Uuid $id, Uuid $restaurantId): ?Tax;
 
