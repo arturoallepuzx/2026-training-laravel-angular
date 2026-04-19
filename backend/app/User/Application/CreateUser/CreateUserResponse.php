@@ -8,8 +8,11 @@ final readonly class CreateUserResponse
 {
     public function __construct(
         public string $id,
+        public string $restaurantId,
+        public string $role,
         public string $name,
         public string $email,
+        public ?string $imageSrc,
         public string $createdAt,
         public string $updatedAt,
     ) {}
@@ -18,22 +21,26 @@ final readonly class CreateUserResponse
     {
         return new self(
             id: $user->id()->value(),
-            name: $user->name(),
+            restaurantId: $user->restaurantId()->value(),
+            role: $user->role()->value(),
+            name: $user->name()->value(),
             email: $user->email()->value(),
+            imageSrc: $user->imageSrc(),
             createdAt: $user->createdAt()->format(\DateTimeInterface::ATOM),
             updatedAt: $user->updatedAt()->format(\DateTimeInterface::ATOM),
         );
     }
 
-    /**
-     * @return array<string, string>
-     */
+    /** @return array<string, mixed> */
     public function toArray(): array
     {
         return [
             'id' => $this->id,
+            'restaurant_id' => $this->restaurantId,
+            'role' => $this->role,
             'name' => $this->name,
             'email' => $this->email,
+            'image_src' => $this->imageSrc,
             'created_at' => $this->createdAt,
             'updated_at' => $this->updatedAt,
         ];

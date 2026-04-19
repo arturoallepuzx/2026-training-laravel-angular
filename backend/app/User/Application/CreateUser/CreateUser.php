@@ -3,11 +3,14 @@
 namespace App\User\Application\CreateUser;
 
 use App\Shared\Domain\ValueObject\Email;
+use App\Shared\Domain\ValueObject\Uuid;
 use App\User\Domain\Entity\User;
 use App\User\Domain\Interfaces\PasswordHasherInterface;
 use App\User\Domain\Interfaces\UserRepositoryInterface;
 use App\User\Domain\ValueObject\PasswordHash;
 use App\User\Domain\ValueObject\UserName;
+use App\User\Domain\ValueObject\UserPin;
+use App\User\Domain\ValueObject\UserRole;
 
 class CreateUser
 {
@@ -16,13 +19,26 @@ class CreateUser
         private PasswordHasherInterface $passwordHasher,
     ) {}
 
-    public function __invoke(string $email, string $name, string $plainPassword): CreateUserResponse
-    {
-        $emailVO = Email::create($email);
-        $nameVO = UserName::create($name);
-        $passwordHashVO = PasswordHash::create($this->passwordHasher->hash($plainPassword));
-        $user = User::dddCreate($emailVO, $nameVO, $passwordHashVO);
-        $this->userRepository->save($user);
+    public function __invoke(
+        string $restaurantId,
+        string $role,
+        string $name,
+        string $email,
+        string $plainPassword,
+        ?string $pin = null,
+        ?string $imageSrc = null,
+    ): CreateUserResponse {
+        $user = User::dddCreate(
+            Uuid::create($restaurantId),
+            UserRole::create($role),
+            UserName::create($name),
+            Email::create($email),
+            PasswordHash::create($this->passwordHasher->hash($plainPassword)),
+            $pin !== null ? UserPin::create($pin) : null,
+            $imageSrc,
+        );
+
+        $this->userRepository->create($user);
 
         return CreateUserResponse::create($user);
     }
