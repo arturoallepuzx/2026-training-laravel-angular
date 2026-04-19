@@ -8,12 +8,16 @@ use App\Tax\Infrastructure\Entrypoint\Http\PutController as TaxPutController;
 use App\User\Infrastructure\Entrypoint\Http\PostController as UserPostController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/users', UserPostController::class);
+Route::prefix('/restaurants/{restaurantId}')
+    ->whereUuid('restaurantId')
+    ->group(function () {
+        Route::post('/users', UserPostController::class);
 
-Route::prefix('/restaurants/{restaurantId}/taxes')->group(function () {
-    Route::get('/', TaxGetAllController::class);
-    Route::post('/', TaxPostController::class);
-    Route::get('/{taxId}', TaxGetByIdController::class);
-    Route::put('/{taxId}', TaxPutController::class);
-    Route::delete('/{taxId}', TaxDeleteController::class);
-});
+        Route::prefix('/taxes')->group(function () {
+            Route::get('/', TaxGetAllController::class);
+            Route::post('/', TaxPostController::class);
+            Route::get('/{taxId}', TaxGetByIdController::class)->whereUuid('taxId');
+            Route::put('/{taxId}', TaxPutController::class)->whereUuid('taxId');
+            Route::delete('/{taxId}', TaxDeleteController::class)->whereUuid('taxId');
+        });
+    });
