@@ -5,19 +5,14 @@ namespace App\User\Infrastructure\Persistence\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class EloquentUser extends Authenticatable
+class EloquentUser extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $table = 'users';
-
-    protected static function newFactory(): Factory
-    {
-        return UserFactory::new();
-    }
 
     protected $fillable = [
         'uuid',
@@ -32,19 +27,11 @@ class EloquentUser extends Authenticatable
 
     protected $hidden = [
         'password',
-        'remember_token',
         'pin',
     ];
 
-    protected function casts(): array
+    protected static function newFactory(): Factory
     {
-        return [
-            'email_verified_at' => 'datetime',
-        ];
-    }
-
-    public function getKeyName(): string
-    {
-        return 'id';
+        return UserFactory::new();
     }
 }
