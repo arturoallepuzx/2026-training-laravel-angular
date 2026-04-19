@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Restaurant\Infrastructure\Persistence\Models\EloquentRestaurant;
 use App\User\Infrastructure\Persistence\Models\EloquentUser;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -20,7 +21,7 @@ class UserFactory extends Factory
     {
         return [
             'uuid' => (string) Str::uuid(),
-            'restaurant_id' => null,
+            'restaurant_id' => EloquentRestaurant::factory(),
             'role' => 'operator',
             'image_src' => null,
             'name' => fake()->name(),
