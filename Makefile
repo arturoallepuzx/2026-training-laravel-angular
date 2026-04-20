@@ -15,13 +15,16 @@ status:
 
 install:
 	docker compose run --rm api composer install
-	docker compose run --rm api php artisan migrate
+	docker compose run --rm api php artisan migrate --seed
 
 install-frontend:
 	docker compose run --rm frontend npm install
 
 db-migrate:
 	docker compose exec api php artisan migrate
+
+db-seed:
+	docker compose exec api php artisan db:seed
 
 test:
 	docker compose exec api php artisan test
