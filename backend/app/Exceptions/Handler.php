@@ -3,7 +3,9 @@
 namespace App\Exceptions;
 
 use App\Shared\Domain\Exception\ConflictException;
+use App\Shared\Domain\Exception\ForbiddenException;
 use App\Shared\Domain\Exception\NotFoundException;
+use App\Shared\Domain\Exception\UnauthorizedException;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
@@ -22,6 +24,14 @@ class Handler
 
         $exceptions->render(function (ConflictException $e) {
             return new JsonResponse(['error' => $e->getMessage()], 409);
+        });
+
+        $exceptions->render(function (UnauthorizedException $e) {
+            return new JsonResponse(['error' => $e->getMessage()], 401);
+        });
+
+        $exceptions->render(function (ForbiddenException $e) {
+            return new JsonResponse(['error' => $e->getMessage()], 403);
         });
 
         $exceptions->render(function (\InvalidArgumentException $e) {
