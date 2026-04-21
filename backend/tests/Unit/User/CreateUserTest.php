@@ -7,6 +7,7 @@ use App\User\Application\CreateUser\CreateUserResponse;
 use App\User\Domain\Entity\User;
 use App\User\Domain\Interfaces\PasswordHasherInterface;
 use App\User\Domain\Interfaces\UserRepositoryInterface;
+use App\User\Domain\ValueObject\PasswordHash;
 use Mockery;
 use PHPUnit\Framework\TestCase;
 
@@ -29,7 +30,7 @@ class CreateUserTest extends TestCase
         $passwordHasher->shouldReceive('hash')
             ->once()
             ->with('plain-password')
-            ->andReturn($hashedPassword);
+            ->andReturn(PasswordHash::create($hashedPassword));
 
         $repository->shouldReceive('create')
             ->once()
