@@ -33,7 +33,7 @@ class OrderSeeder extends Seeder
         foreach ($tables->random(10) as $table) {
             $openedById = $operators->random()->id;
             $closedById = $operators->random()->id;
-            
+
             EloquentOrder::factory()->create([
                 'restaurant_id' => $restaurant->id,
                 'table_id' => $table->id,

@@ -24,7 +24,7 @@ class EloquentRestaurantIdResolver implements RestaurantIdResolverInterface
             ->value('id');
 
         if ($id === null) {
-            throw (new ModelNotFoundException())->setModel(EloquentRestaurant::class, [$uuid]);
+            throw (new ModelNotFoundException)->setModel(EloquentRestaurant::class, [$uuid]);
         }
 
         return $this->cache[$uuid] = (int) $id;

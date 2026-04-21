@@ -19,7 +19,7 @@ class ProductSeeder extends Seeder
 
         foreach ($families as $family) {
             $taxId = ($family->name === 'Bebidas') ? $taxGeneral->id : $taxReduced->id;
-            
+
             EloquentProduct::factory(5)->create([
                 'restaurant_id' => $restaurant->id,
                 'family_id' => $family->id,

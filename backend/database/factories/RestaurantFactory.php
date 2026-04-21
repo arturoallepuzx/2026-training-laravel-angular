@@ -21,8 +21,8 @@ class RestaurantFactory extends Factory
         return [
             'uuid' => (string) Str::uuid(),
             'name' => fake()->company(),
-            'legal_name' => fake()->company() . ' S.L.',
-            'tax_id' => 'B' . fake()->randomNumber(8, true),
+            'legal_name' => fake()->company().' S.L.',
+            'tax_id' => 'B'.fake()->randomNumber(8, true),
             'email' => fake()->unique()->companyEmail(),
             'password' => static::$password ??= Hash::make('password'),
         ];

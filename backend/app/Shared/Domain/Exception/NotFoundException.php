@@ -2,6 +2,4 @@
 
 namespace App\Shared\Domain\Exception;
 
-abstract class NotFoundException extends DomainException
-{
-}
+abstract class NotFoundException extends DomainException {}

@@ -2,6 +2,4 @@
 
 namespace App\Shared\Domain\Exception;
 
-abstract class UnauthorizedException extends DomainException
-{
-}
+abstract class UnauthorizedException extends DomainException {}

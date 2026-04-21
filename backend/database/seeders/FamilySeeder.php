@@ -13,7 +13,7 @@ class FamilySeeder extends Seeder
         $restaurant = EloquentRestaurant::first();
 
         $familyNames = ['Bebidas', 'Entrantes', 'Platos Principales', 'Postres'];
-        
+
         foreach ($familyNames as $familyName) {
             EloquentFamily::factory()->create([
                 'restaurant_id' => $restaurant->id,

@@ -2,6 +2,4 @@
 
 namespace App\Shared\Domain\Exception;
 
-abstract class DomainException extends \RuntimeException
-{
-}
+abstract class DomainException extends \RuntimeException {}

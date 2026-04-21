@@ -23,7 +23,7 @@ class OrderLineSeeder extends Seeder
 
         foreach ($orders as $order) {
             $orderProducts = $products->random(rand(2, 5));
-            
+
             foreach ($orderProducts as $product) {
                 $qty = rand(1, 4);
                 $taxPercentage = EloquentTax::find($product->tax_id)->percentage;

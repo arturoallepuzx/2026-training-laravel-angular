@@ -12,7 +12,7 @@ class ZoneSeeder extends Seeder
     {
         $restaurant = EloquentRestaurant::first();
         $zoneNames = ['Terraza', 'Salón Principal', 'Barra'];
-        
+
         foreach ($zoneNames as $zoneName) {
             EloquentZone::factory()->create([
                 'restaurant_id' => $restaurant->id,

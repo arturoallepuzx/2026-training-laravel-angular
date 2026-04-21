@@ -17,7 +17,7 @@ class TaxSeeder extends Seeder
             'name' => 'IVA General (21%)',
             'percentage' => 21,
         ]);
-        
+
         EloquentTax::factory()->create([
             'restaurant_id' => $restaurant->id,
             'name' => 'IVA Reducido (10%)',
