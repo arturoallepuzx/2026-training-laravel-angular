@@ -7,7 +7,6 @@ use App\Shared\Domain\ValueObject\Uuid;
 use App\User\Domain\Entity\User;
 use App\User\Domain\Interfaces\PasswordHasherInterface;
 use App\User\Domain\Interfaces\UserRepositoryInterface;
-use App\User\Domain\ValueObject\PasswordHash;
 use App\User\Domain\ValueObject\UserName;
 use App\User\Domain\ValueObject\UserPin;
 use App\User\Domain\ValueObject\UserRole;
@@ -33,7 +32,7 @@ class CreateUser
             UserRole::create($role),
             UserName::create($name),
             Email::create($email),
-            PasswordHash::create($this->passwordHasher->hash($plainPassword)),
+            $this->passwordHasher->hash($plainPassword),
             $pin !== null ? UserPin::create($pin) : null,
             $imageSrc,
         );
