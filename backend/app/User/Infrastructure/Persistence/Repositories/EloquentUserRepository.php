@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\User\Infrastructure\Persistence\Repositories;
 
+use App\Shared\Domain\ValueObject\Email;
 use App\Shared\Domain\ValueObject\Uuid;
 use App\Shared\Infrastructure\Persistence\RestaurantIdResolverInterface;
 use App\User\Domain\Entity\User;
@@ -37,6 +38,20 @@ class EloquentUserRepository implements UserRepositoryInterface
     {
         $model = $this->model->newQuery()
             ->where('uuid', $id->value())
+            ->where('restaurant_id', $this->restaurantIdResolver->toInternalId($restaurantId))
+            ->first();
+
+        if ($model === null) {
+            return null;
+        }
+
+        return $this->toDomainEntity($model, $restaurantId);
+    }
+
+    public function findByEmail(Email $email, Uuid $restaurantId): ?User
+    {
+        $model = $this->model->newQuery()
+            ->where('email', $email->value())
             ->where('restaurant_id', $this->restaurantIdResolver->toInternalId($restaurantId))
             ->first();
 
