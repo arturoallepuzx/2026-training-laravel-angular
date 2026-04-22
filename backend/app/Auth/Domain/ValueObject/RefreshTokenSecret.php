@@ -33,9 +33,9 @@ class RefreshTokenSecret
         return $this->value;
     }
 
-    public function hash(): string
+    public function hash(): RefreshTokenHash
     {
-        return hash(self::HASH_ALGO, $this->value);
+        return RefreshTokenHash::create(hash(self::HASH_ALGO, $this->value));
     }
 
     public function equals(self $other): bool
