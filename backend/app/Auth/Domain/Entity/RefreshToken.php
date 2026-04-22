@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Auth\Domain\Entity;
 
+use App\Auth\Domain\ValueObject\RefreshTokenHash;
 use App\Auth\Domain\ValueObject\RefreshTokenSecret;
 use App\Shared\Domain\ValueObject\DomainDateTime;
 use App\Shared\Domain\ValueObject\Uuid;
@@ -14,7 +15,7 @@ class RefreshToken
         private Uuid $id,
         private Uuid $userId,
         private Uuid $sessionId,
-        private string $tokenHash,
+        private RefreshTokenHash $tokenHash,
         private DomainDateTime $expiresAt,
         private ?DomainDateTime $revokedAt,
         private ?Uuid $replacedById,
@@ -62,7 +63,7 @@ class RefreshToken
             Uuid::create($id),
             Uuid::create($userId),
             Uuid::create($sessionId),
-            $tokenHash,
+            RefreshTokenHash::create($tokenHash),
             DomainDateTime::create($expiresAt),
             $revokedAt !== null ? DomainDateTime::create($revokedAt) : null,
             $replacedById !== null ? Uuid::create($replacedById) : null,
@@ -114,7 +115,7 @@ class RefreshToken
         return $this->sessionId;
     }
 
-    public function tokenHash(): string
+    public function tokenHash(): RefreshTokenHash
     {
         return $this->tokenHash;
     }
