@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\User\Infrastructure;
 
 use App\User\Domain\ValueObject\PasswordHash;

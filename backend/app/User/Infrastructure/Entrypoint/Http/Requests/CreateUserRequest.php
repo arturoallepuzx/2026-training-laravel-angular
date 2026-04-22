@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\User\Infrastructure\Entrypoint\Http\Requests;
 
 use App\User\Domain\ValueObject\UserRole;

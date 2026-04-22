@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Family\Infrastructure\Persistence\Models;
 
 use Database\Factories\FamilyFactory;

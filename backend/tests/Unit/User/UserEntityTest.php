@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\User;
 
 use App\Shared\Domain\ValueObject\DomainDateTime;
