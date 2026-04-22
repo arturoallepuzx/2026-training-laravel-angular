@@ -55,9 +55,7 @@ class RefreshTokenSecretTest extends TestCase
 
         $hash = $secret->hash();
 
-        $this->assertSame(64, strlen($hash));
-        $this->assertTrue(ctype_xdigit($hash));
-        $this->assertSame(hash('sha256', self::VALID_SECRET), $hash);
+        $this->assertSame(hash('sha256', self::VALID_SECRET), $hash->value());
     }
 
     public function test_same_value_produces_same_hash(): void
@@ -65,7 +63,7 @@ class RefreshTokenSecretTest extends TestCase
         $a = RefreshTokenSecret::create(self::VALID_SECRET);
         $b = RefreshTokenSecret::create(self::VALID_SECRET);
 
-        $this->assertSame($a->hash(), $b->hash());
+        $this->assertTrue($a->hash()->equals($b->hash()));
     }
 
     public function test_equals_compares_by_value(): void

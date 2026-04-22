@@ -25,7 +25,7 @@ class RefreshTokenEntityTest extends TestCase
 
         $this->assertSame($userId->value(), $token->userId()->value());
         $this->assertSame($sessionId->value(), $token->sessionId()->value());
-        $this->assertSame($secret->hash(), $token->tokenHash());
+        $this->assertTrue($secret->hash()->equals($token->tokenHash()));
         $this->assertEquals($expiresAt->value(), $token->expiresAt()->value());
         $this->assertNull($token->revokedAt());
         $this->assertNull($token->replacedById());
@@ -63,7 +63,7 @@ class RefreshTokenEntityTest extends TestCase
         );
 
         $this->assertSame($id, $token->id()->value());
-        $this->assertSame($hash, $token->tokenHash());
+        $this->assertSame($hash, $token->tokenHash()->value());
         $this->assertNull($token->revokedAt());
         $this->assertNull($token->replacedById());
         $this->assertFalse($token->isRevoked());
