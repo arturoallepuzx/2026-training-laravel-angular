@@ -15,4 +15,9 @@ class ExpiredAccessTokenException extends UnauthorizedException
             sprintf('Access token expired at %s.', $expiredAt->format(\DateTimeInterface::ATOM))
         );
     }
+
+    public static function expired(): self
+    {
+        return new self('Access token expired.');
+    }
 }
