@@ -44,6 +44,7 @@ serve-frontend:
 
 lint:
 	docker compose exec api vendor/bin/pint
+	docker compose exec api vendor/bin/pint --config=pint_strict.json app tests
 
 logs-backend:
 	docker compose exec -it api sh -c "touch storage/logs/laravel.log && less +F storage/logs/laravel.log"

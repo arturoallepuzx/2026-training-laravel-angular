@@ -162,5 +162,5 @@ Antes de subir cambios, se recomienda:
 
 ```bash
 make test   # tests del backend (PHPUnit)
-make lint   # formatear código PHP (Laravel Pint)
+make lint   # formatear código PHP (Laravel Pint) y Strict Types
 ```

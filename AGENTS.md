@@ -176,6 +176,8 @@ make lint            # Laravel Pint
 ## 6. Estilo de código
 
 - Seguir **PSR-12** y las recomendaciones de los **Symfony Coding Standards** (inspiradas en PSR-1/2/4/12): ver [`Coding Standards`](https://symfony.com/doc/current/contributing/code/standards.html).
+- **Tipado estricto en dominio y tests**: todos los archivos PHP bajo `backend/app/` y `backend/tests/` deben declarar `declare(strict_types=1);` inmediatamente tras `<?php`. `make lint` lo impone automáticamente (segunda pasada con `pint_strict.json` sobre `app/` y `tests/`).
+
 - Un **archivo por clase** (sin clases auxiliares anidadas).
 - **Imports (`use`) explícitos** para todas las clases que no estén en el espacio de nombres global.
 - Propiedades **antes** de los métodos; primero métodos públicos, luego protegidos, luego privados (constructor al inicio).
