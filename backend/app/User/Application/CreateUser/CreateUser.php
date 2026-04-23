@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\User\Application\CreateUser;
 
 use App\Shared\Domain\ValueObject\Email;
+use App\Shared\Domain\ValueObject\UserRole;
 use App\Shared\Domain\ValueObject\Uuid;
 use App\User\Domain\Entity\User;
 use App\User\Domain\Interfaces\PasswordHasherInterface;
 use App\User\Domain\Interfaces\UserRepositoryInterface;
 use App\User\Domain\ValueObject\UserName;
 use App\User\Domain\ValueObject\UserPin;
-use App\User\Domain\ValueObject\UserRole;
 
 class CreateUser
 {
