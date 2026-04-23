@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Auth\Domain\ValueObject;
 
 use App\Shared\Domain\ValueObject\DomainDateTime;
-use App\Shared\Domain\ValueObject\Uuid;
 use App\Shared\Domain\ValueObject\UserRole;
+use App\Shared\Domain\ValueObject\Uuid;
 
 class AccessTokenPayload
 {
