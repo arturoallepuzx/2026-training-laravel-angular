@@ -6,11 +6,11 @@ namespace App\User\Domain\Entity;
 
 use App\Shared\Domain\ValueObject\DomainDateTime;
 use App\Shared\Domain\ValueObject\Email;
+use App\Shared\Domain\ValueObject\UserRole;
 use App\Shared\Domain\ValueObject\Uuid;
 use App\User\Domain\ValueObject\PasswordHash;
 use App\User\Domain\ValueObject\UserName;
 use App\User\Domain\ValueObject\UserPin;
-use App\User\Domain\ValueObject\UserRole;
 
 class User
 {
