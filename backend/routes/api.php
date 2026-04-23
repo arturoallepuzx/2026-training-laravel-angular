@@ -5,12 +5,17 @@ use App\Tax\Infrastructure\Entrypoint\Http\GetAllController as TaxGetAllControll
 use App\Tax\Infrastructure\Entrypoint\Http\GetByIdController as TaxGetByIdController;
 use App\Tax\Infrastructure\Entrypoint\Http\PostController as TaxPostController;
 use App\Tax\Infrastructure\Entrypoint\Http\PutController as TaxPutController;
+use App\User\Infrastructure\Entrypoint\Http\LoginPostController as UserLoginPostController;
 use App\User\Infrastructure\Entrypoint\Http\PostController as UserPostController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('/restaurants/{restaurantId}')
     ->whereUuid('restaurantId')
     ->group(function () {
+        Route::prefix('/auth')->group(function () {
+            Route::post('/login', UserLoginPostController::class);
+        });
+
         Route::post('/users', UserPostController::class);
 
         Route::prefix('/taxes')->group(function () {
