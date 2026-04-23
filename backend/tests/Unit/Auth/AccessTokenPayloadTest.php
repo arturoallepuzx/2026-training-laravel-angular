@@ -6,8 +6,8 @@ namespace Tests\Unit\Auth;
 
 use App\Auth\Domain\ValueObject\AccessTokenPayload;
 use App\Shared\Domain\ValueObject\DomainDateTime;
+use App\Shared\Domain\ValueObject\UserRole;
 use App\Shared\Domain\ValueObject\Uuid;
-use App\User\Domain\ValueObject\UserRole;
 use PHPUnit\Framework\TestCase;
 
 class AccessTokenPayloadTest extends TestCase
