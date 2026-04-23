@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\User\Infrastructure\Entrypoint\Http\Requests;
 
-use App\User\Domain\ValueObject\UserRole;
+use App\Shared\Domain\ValueObject\UserRole;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
