@@ -6,7 +6,7 @@ namespace App\Auth\Domain\ValueObject;
 
 use App\Shared\Domain\ValueObject\DomainDateTime;
 use App\Shared\Domain\ValueObject\Uuid;
-use App\User\Domain\ValueObject\UserRole;
+use App\Shared\Domain\ValueObject\UserRole;
 
 class AccessTokenPayload
 {
