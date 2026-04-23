@@ -14,13 +14,9 @@ use App\Auth\Domain\ValueObject\IssuedRefreshToken;
 use App\Auth\Domain\ValueObject\RefreshTokenSecret;
 use App\Auth\Infrastructure\Services\JwtUserAuthenticationIssuer;
 use App\Shared\Domain\ValueObject\DomainDateTime;
-use App\Shared\Domain\ValueObject\Email;
 use App\Shared\Domain\ValueObject\UserRole;
 use App\Shared\Domain\ValueObject\Uuid;
-use App\User\Domain\Entity\User;
 use App\User\Domain\ValueObject\AuthenticationSubject;
-use App\User\Domain\ValueObject\PasswordHash;
-use App\User\Domain\ValueObject\UserName;
 use Mockery;
 use PHPUnit\Framework\TestCase;
 
@@ -30,8 +26,6 @@ class JwtUserAuthenticationIssuerTest extends TestCase
 
     private const REFRESH_TTL = 2_592_000;
 
-    private const HASHED_PASSWORD = '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi';
-
     protected function tearDown(): void
     {
         Mockery::close();
@@ -40,7 +34,11 @@ class JwtUserAuthenticationIssuerTest extends TestCase
 
     public function test_issue_for_emits_tokens_and_persists_refresh_token(): void
     {
-        $user = $this->buildUser();
+        $subject = AuthenticationSubject::create(
+            Uuid::generate(),
+            Uuid::generate(),
+            UserRole::admin(),
+        );
 
         $capturedAccessPayload = null;
         $capturedRefreshSessionId = null;
@@ -54,7 +52,7 @@ class JwtUserAuthenticationIssuerTest extends TestCase
             rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=')
         );
         $refreshEntity = RefreshToken::dddCreate(
-            $user->id(),
+            $subject->userId(),
             Uuid::generate(),
             $refreshSecret,
             DomainDateTime::create((new \DateTimeImmutable)->modify('+30 days')),
@@ -74,7 +72,7 @@ class JwtUserAuthenticationIssuerTest extends TestCase
         $refreshTokenIssuer->shouldReceive('issue')
             ->once()
             ->with(
-                Mockery::on(fn (Uuid $userId): bool => $userId->value() === $user->id()->value()),
+                Mockery::on(fn (Uuid $userId): bool => $userId->value() === $subject->userId()->value()),
                 Mockery::on(function (Uuid $sessionId) use (&$capturedRefreshSessionId): bool {
                     $capturedRefreshSessionId = $sessionId->value();
 
@@ -98,16 +96,12 @@ class JwtUserAuthenticationIssuerTest extends TestCase
         );
 
         $issuedAuthentication = $issuer->issueFor(
-            AuthenticationSubject::create(
-                $user->id(),
-                $user->restaurantId(),
-                $user->role(),
-            )
+            $subject
         );
 
         $this->assertNotNull($capturedAccessPayload);
-        $this->assertSame($user->id()->value(), $capturedAccessPayload->userId()->value());
-        $this->assertSame($user->restaurantId()->value(), $capturedAccessPayload->restaurantId()->value());
+        $this->assertSame($subject->userId()->value(), $capturedAccessPayload->userId()->value());
+        $this->assertSame($subject->restaurantId()->value(), $capturedAccessPayload->restaurantId()->value());
         $this->assertSame($capturedAccessPayload->sessionId()->value(), $capturedRefreshSessionId);
         $this->assertSame('jwt-value', $issuedAuthentication->accessToken());
         $this->assertSame($refreshSecret->value(), $issuedAuthentication->refreshToken());
@@ -139,16 +133,4 @@ class JwtUserAuthenticationIssuerTest extends TestCase
         );
     }
 
-    private function buildUser(): User
-    {
-        return User::dddCreate(
-            Uuid::generate(),
-            UserRole::admin(),
-            UserName::create('Auth User'),
-            Email::create('auth-user@example.com'),
-            PasswordHash::create(self::HASHED_PASSWORD),
-            null,
-            null,
-        );
-    }
 }
