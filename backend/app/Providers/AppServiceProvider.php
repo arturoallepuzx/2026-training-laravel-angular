@@ -4,11 +4,23 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Auth\Domain\Interfaces\AccessTokenIssuerInterface;
+use App\Auth\Domain\Interfaces\AccessTokenVerifierInterface;
+use App\Auth\Domain\Interfaces\RefreshTokenIssuerInterface;
+use App\Auth\Domain\Interfaces\RefreshTokenRepositoryInterface;
+use App\Auth\Infrastructure\Persistence\Repositories\EloquentRefreshTokenRepository;
+use App\Auth\Infrastructure\Services\FirebaseJwtAccessTokenIssuer;
+use App\Auth\Infrastructure\Services\FirebaseJwtAccessTokenVerifier;
+use App\Auth\Infrastructure\Services\JwtUserAuthenticationIssuer;
+use App\Auth\Infrastructure\Services\RandomRefreshTokenIssuer;
 use App\Shared\Infrastructure\Persistence\EloquentRestaurantIdResolver;
+use App\Shared\Infrastructure\Persistence\EloquentUserIdResolver;
 use App\Shared\Infrastructure\Persistence\RestaurantIdResolverInterface;
+use App\Shared\Infrastructure\Persistence\UserIdResolverInterface;
 use App\Tax\Domain\Interfaces\TaxRepositoryInterface;
 use App\Tax\Infrastructure\Persistence\Repositories\EloquentTaxRepository;
 use App\User\Domain\Interfaces\PasswordHasherInterface;
+use App\User\Domain\Interfaces\UserAuthenticationIssuerInterface;
 use App\User\Domain\Interfaces\UserRepositoryInterface;
 use App\User\Infrastructure\Persistence\Repositories\EloquentUserRepository;
 use App\User\Infrastructure\Services\LaravelPasswordHasher;
@@ -24,7 +36,29 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(UserRepositoryInterface::class, EloquentUserRepository::class);
         $this->app->bind(PasswordHasherInterface::class, LaravelPasswordHasher::class);
         $this->app->bind(TaxRepositoryInterface::class, EloquentTaxRepository::class);
+        $this->app->bind(RefreshTokenIssuerInterface::class, RandomRefreshTokenIssuer::class);
+        $this->app->bind(RefreshTokenRepositoryInterface::class, EloquentRefreshTokenRepository::class);
+
+        $this->app->scoped(AccessTokenIssuerInterface::class, function (): AccessTokenIssuerInterface {
+            return new FirebaseJwtAccessTokenIssuer((string) config('auth_tokens.jwt_secret'));
+        });
+
+        $this->app->scoped(AccessTokenVerifierInterface::class, function (): AccessTokenVerifierInterface {
+            return new FirebaseJwtAccessTokenVerifier((string) config('auth_tokens.jwt_secret'));
+        });
+
+        $this->app->scoped(UserAuthenticationIssuerInterface::class, function ($app): UserAuthenticationIssuerInterface {
+            return new JwtUserAuthenticationIssuer(
+                $app->make(AccessTokenIssuerInterface::class),
+                $app->make(RefreshTokenIssuerInterface::class),
+                $app->make(RefreshTokenRepositoryInterface::class),
+                (int) config('auth_tokens.access_ttl_seconds'),
+                (int) config('auth_tokens.refresh_ttl_seconds'),
+            );
+        });
+
         $this->app->scoped(RestaurantIdResolverInterface::class, EloquentRestaurantIdResolver::class);
+        $this->app->scoped(UserIdResolverInterface::class, EloquentUserIdResolver::class);
     }
 
     /**
