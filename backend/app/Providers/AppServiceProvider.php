@@ -40,11 +40,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(RefreshTokenRepositoryInterface::class, EloquentRefreshTokenRepository::class);
 
         $this->app->scoped(AccessTokenIssuerInterface::class, function (): AccessTokenIssuerInterface {
-            return new FirebaseJwtAccessTokenIssuer((string) config('auth_tokens.jwt_secret'));
+            return new FirebaseJwtAccessTokenIssuer($this->jwtSecret());
         });
 
         $this->app->scoped(AccessTokenVerifierInterface::class, function (): AccessTokenVerifierInterface {
-            return new FirebaseJwtAccessTokenVerifier((string) config('auth_tokens.jwt_secret'));
+            return new FirebaseJwtAccessTokenVerifier($this->jwtSecret());
         });
 
         $this->app->scoped(UserAuthenticationIssuerInterface::class, function ($app): UserAuthenticationIssuerInterface {
@@ -52,8 +52,8 @@ class AppServiceProvider extends ServiceProvider
                 $app->make(AccessTokenIssuerInterface::class),
                 $app->make(RefreshTokenIssuerInterface::class),
                 $app->make(RefreshTokenRepositoryInterface::class),
-                (int) config('auth_tokens.access_ttl_seconds'),
-                (int) config('auth_tokens.refresh_ttl_seconds'),
+                $this->accessTtlSeconds(),
+                $this->refreshTtlSeconds(),
             );
         });
 
@@ -67,5 +67,47 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         //
+    }
+
+    private function jwtSecret(): string
+    {
+        $secret = (string) config('auth_tokens.jwt_secret');
+
+        if (trim($secret) === '') {
+            throw new \InvalidArgumentException('AUTH_JWT_SECRET is required.');
+        }
+
+        if (strlen($secret) < 32) {
+            throw new \InvalidArgumentException('AUTH_JWT_SECRET is invalid.');
+        }
+
+        return $secret;
+    }
+
+    private function accessTtlSeconds(): int
+    {
+        $seconds = (int) config('auth_tokens.access_ttl_seconds');
+
+        if ($seconds <= 0) {
+            throw new \InvalidArgumentException('AUTH_ACCESS_TTL_SECONDS must be greater than 0.');
+        }
+
+        return $seconds;
+    }
+
+    private function refreshTtlSeconds(): int
+    {
+        $accessTtlSeconds = $this->accessTtlSeconds();
+        $seconds = (int) config('auth_tokens.refresh_ttl_seconds');
+
+        if ($seconds <= 0) {
+            throw new \InvalidArgumentException('AUTH_REFRESH_TTL_SECONDS must be greater than 0.');
+        }
+
+        if ($seconds <= $accessTtlSeconds) {
+            throw new \InvalidArgumentException('AUTH_REFRESH_TTL_SECONDS must be greater than AUTH_ACCESS_TTL_SECONDS.');
+        }
+
+        return $seconds;
     }
 }
