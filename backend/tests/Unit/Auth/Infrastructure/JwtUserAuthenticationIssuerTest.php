@@ -132,5 +132,4 @@ class JwtUserAuthenticationIssuerTest extends TestCase
             -1,
         );
     }
-
 }
