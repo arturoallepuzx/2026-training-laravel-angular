@@ -120,4 +120,44 @@ class EloquentRefreshTokenRepositoryTest extends TestCase
             'replaced_by_id' => $newInternalId,
         ]);
     }
+
+    public function test_revoke_all_in_session_revokes_only_active_tokens_of_given_session(): void
+    {
+        $user = EloquentUser::factory()->create();
+        $userId = Uuid::create($user->uuid);
+        $sessionA = Uuid::generate();
+        $sessionB = Uuid::generate();
+
+        $activeInA = RefreshToken::dddCreate($userId, $sessionA, $this->randomSecret(), $this->futureExpiration());
+        $alreadyRevokedInA = RefreshToken::dddCreate($userId, $sessionA, $this->randomSecret(), $this->futureExpiration());
+        $alreadyRevokedInA->revoke();
+        $previouslyRevokedAtSeconds = $alreadyRevokedInA->revokedAt()?->value()->getTimestamp();
+
+        $activeInB = RefreshToken::dddCreate($userId, $sessionB, $this->randomSecret(), $this->futureExpiration());
+
+        $repository = $this->repository();
+        $repository->create($activeInA);
+        $repository->create($alreadyRevokedInA);
+        $repository->create($activeInB);
+
+        $repository->revokeAllInSession($sessionA);
+
+        $reloadedActiveInA = $repository->findByTokenHash($activeInA->tokenHash());
+        $reloadedAlreadyRevokedInA = $repository->findByTokenHash($alreadyRevokedInA->tokenHash());
+        $reloadedActiveInB = $repository->findByTokenHash($activeInB->tokenHash());
+
+        $this->assertNotNull($reloadedActiveInA);
+        $this->assertTrue($reloadedActiveInA->isRevoked(), 'active token in session A must be revoked');
+
+        $this->assertNotNull($reloadedAlreadyRevokedInA);
+        $this->assertTrue($reloadedAlreadyRevokedInA->isRevoked());
+        $this->assertSame(
+            $previouslyRevokedAtSeconds,
+            $reloadedAlreadyRevokedInA->revokedAt()?->value()->getTimestamp(),
+            'already-revoked token must keep its original revoked_at',
+        );
+
+        $this->assertNotNull($reloadedActiveInB);
+        $this->assertFalse($reloadedActiveInB->isRevoked(), 'token in session B must remain active');
+    }
 }
