@@ -6,7 +6,9 @@ use App\Tax\Infrastructure\Entrypoint\Http\GetByIdController as TaxGetByIdContro
 use App\Tax\Infrastructure\Entrypoint\Http\PostController as TaxPostController;
 use App\Tax\Infrastructure\Entrypoint\Http\PutController as TaxPutController;
 use App\User\Infrastructure\Entrypoint\Http\LoginPostController as UserLoginPostController;
+use App\User\Infrastructure\Entrypoint\Http\LogoutPostController as UserLogoutPostController;
 use App\User\Infrastructure\Entrypoint\Http\PostController as UserPostController;
+use App\User\Infrastructure\Entrypoint\Http\RefreshPostController as UserRefreshPostController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('/restaurants/{restaurantId}')
@@ -14,6 +16,8 @@ Route::prefix('/restaurants/{restaurantId}')
     ->group(function () {
         Route::prefix('/auth')->group(function () {
             Route::post('/login', UserLoginPostController::class);
+            Route::post('/refresh', UserRefreshPostController::class);
+            Route::post('/logout', UserLogoutPostController::class);
         });
 
         Route::post('/users', UserPostController::class);
