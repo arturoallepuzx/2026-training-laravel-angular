@@ -8,13 +8,10 @@ use App\Auth\Domain\Entity\RefreshToken;
 use App\Auth\Domain\Interfaces\RefreshTokenRepositoryInterface;
 use App\Auth\Domain\ValueObject\RefreshTokenSecret;
 use App\Auth\Infrastructure\Services\JwtUserAuthenticationRevoker;
-use App\Shared\Domain\ValueObject\Email;
-use App\Shared\Domain\ValueObject\UserRole;
 use App\Shared\Domain\ValueObject\Uuid;
 use App\User\Domain\Entity\User;
 use App\User\Domain\Interfaces\UserRepositoryInterface;
 use App\User\Domain\ValueObject\PasswordHash;
-use App\User\Domain\ValueObject\UserName;
 use Mockery;
 use PHPUnit\Framework\TestCase;
 
