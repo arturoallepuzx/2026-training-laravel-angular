@@ -8,6 +8,7 @@ use App\Auth\Domain\Entity\RefreshToken;
 use App\Auth\Domain\Interfaces\RefreshTokenRepositoryInterface;
 use App\Auth\Domain\ValueObject\RefreshTokenHash;
 use App\Auth\Infrastructure\Persistence\Models\EloquentRefreshToken;
+use App\Shared\Domain\ValueObject\DomainDateTime;
 use App\Shared\Domain\ValueObject\Uuid;
 use App\Shared\Infrastructure\Persistence\UserIdResolverInterface;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -59,6 +60,19 @@ class EloquentRefreshTokenRepository implements RefreshTokenRepositoryInterface
                     ? $this->resolveInternalId($refreshToken->replacedById())
                     : null,
                 'updated_at' => $refreshToken->updatedAt()->value(),
+            ]);
+    }
+
+    public function revokeAllInSession(Uuid $sessionId): void
+    {
+        $now = DomainDateTime::now()->value();
+
+        $this->model->newQuery()
+            ->where('session_uuid', $sessionId->value())
+            ->whereNull('revoked_at')
+            ->update([
+                'revoked_at' => $now,
+                'updated_at' => $now,
             ]);
     }
 

@@ -30,6 +30,10 @@ class JwtUserAuthenticationIssuer implements UserAuthenticationIssuerInterface
         if ($refreshTtlSeconds <= 0) {
             throw new \InvalidArgumentException('Refresh token TTL must be greater than 0.');
         }
+
+        if ($refreshTtlSeconds <= $accessTtlSeconds) {
+            throw new \InvalidArgumentException('Refresh token TTL must be greater than access token TTL.');
+        }
     }
 
     public function issueFor(AuthenticationSubject $subject): IssuedAuthentication
