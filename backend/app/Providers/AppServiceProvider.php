@@ -15,6 +15,7 @@ use App\Auth\Infrastructure\Services\JwtUserAuthenticationIssuer;
 use App\Auth\Infrastructure\Services\JwtUserAuthenticationRefresher;
 use App\Auth\Infrastructure\Services\JwtUserAuthenticationRevoker;
 use App\Auth\Infrastructure\Services\RandomRefreshTokenIssuer;
+use App\Shared\Infrastructure\Auth\AuthContextHolder;
 use App\Shared\Infrastructure\Persistence\EloquentRestaurantIdResolver;
 use App\Shared\Infrastructure\Persistence\EloquentUserIdResolver;
 use App\Shared\Infrastructure\Persistence\RestaurantIdResolverInterface;
@@ -81,6 +82,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->scoped(RestaurantIdResolverInterface::class, EloquentRestaurantIdResolver::class);
         $this->app->scoped(UserIdResolverInterface::class, EloquentUserIdResolver::class);
+        $this->app->scoped(AuthContextHolder::class);
     }
 
     /**

@@ -1,5 +1,7 @@
 <?php
 
+use App\Auth\Infrastructure\Http\Middleware\AuthenticateAccessToken;
+use App\Auth\Infrastructure\Http\Middleware\RequireRole;
 use App\Exceptions\Handler;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -13,7 +15,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'auth.access_token' => AuthenticateAccessToken::class,
+            'auth.role' => RequireRole::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         Handler::register($exceptions);
