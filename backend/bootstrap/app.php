@@ -1,6 +1,7 @@
 <?php
 
 use App\Auth\Infrastructure\Http\Middleware\AuthenticateAccessToken;
+use App\Auth\Infrastructure\Http\Middleware\EnsureTokenMatchesRestaurant;
 use App\Auth\Infrastructure\Http\Middleware\RequireRole;
 use App\Exceptions\Handler;
 use Illuminate\Foundation\Application;
@@ -17,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'auth.access_token' => AuthenticateAccessToken::class,
+            'auth.restaurant' => EnsureTokenMatchesRestaurant::class,
             'auth.role' => RequireRole::class,
         ]);
     })
