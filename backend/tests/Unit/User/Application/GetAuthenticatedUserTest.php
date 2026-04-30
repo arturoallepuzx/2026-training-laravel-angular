@@ -6,7 +6,6 @@ namespace Tests\Unit\User\Application;
 
 use App\Shared\Domain\Exception\AuthenticationRequiredException;
 use App\Shared\Domain\ValueObject\AuthContext;
-use App\Shared\Domain\ValueObject\Email;
 use App\Shared\Domain\ValueObject\UserRole;
 use App\Shared\Domain\ValueObject\Uuid;
 use App\Shared\Infrastructure\Auth\AuthContextHolder;
@@ -15,7 +14,6 @@ use App\User\Application\GetAuthenticatedUser\GetAuthenticatedUserResponse;
 use App\User\Domain\Entity\User;
 use App\User\Domain\Interfaces\UserRepositoryInterface;
 use App\User\Domain\ValueObject\PasswordHash;
-use App\User\Domain\ValueObject\UserName;
 use Mockery;
 use PHPUnit\Framework\TestCase;
 
