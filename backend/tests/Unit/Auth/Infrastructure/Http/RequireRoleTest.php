@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Auth\Infrastructure\Http;
 
-use App\Auth\Domain\Exception\MissingAuthContextException;
 use App\Auth\Domain\Exception\RoleNotAllowedException;
 use App\Auth\Infrastructure\Http\Middleware\RequireRole;
+use App\Shared\Domain\Exception\AuthenticationRequiredException;
 use App\Shared\Domain\ValueObject\AuthContext;
 use App\Shared\Domain\ValueObject\UserRole;
 use App\Shared\Domain\ValueObject\Uuid;
@@ -39,7 +39,7 @@ class RequireRoleTest extends TestCase
     {
         $middleware = new RequireRole(new AuthContextHolder);
 
-        $this->expectException(MissingAuthContextException::class);
+        $this->expectException(AuthenticationRequiredException::class);
 
         $middleware->handle(Request::create('/'), fn () => new Response, 'admin');
     }
