@@ -23,13 +23,19 @@ Route::prefix('/restaurants/{restaurantId}')
                 ->middleware('auth.access_token');
         });
 
-        Route::post('/users', UserPostController::class);
+        Route::post('/users', UserPostController::class)
+            ->middleware(['auth.access_token', 'auth.restaurant', 'auth.role:admin']);
 
-        Route::prefix('/taxes')->group(function () {
-            Route::get('/', TaxGetAllController::class);
-            Route::post('/', TaxPostController::class);
-            Route::get('/{taxId}', TaxGetByIdController::class)->whereUuid('taxId');
-            Route::put('/{taxId}', TaxPutController::class)->whereUuid('taxId');
-            Route::delete('/{taxId}', TaxDeleteController::class)->whereUuid('taxId');
-        });
+        Route::prefix('/taxes')
+            ->middleware(['auth.access_token', 'auth.restaurant'])
+            ->group(function () {
+                Route::get('/', TaxGetAllController::class);
+                Route::get('/{taxId}', TaxGetByIdController::class)->whereUuid('taxId');
+
+                Route::post('/', TaxPostController::class)->middleware('auth.role:admin');
+
+                Route::put('/{taxId}', TaxPutController::class)->whereUuid('taxId')->middleware('auth.role:admin');
+
+                Route::delete('/{taxId}', TaxDeleteController::class)->whereUuid('taxId')->middleware('auth.role:admin');
+            });
     });
