@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Auth\Infrastructure\Http\Middleware;
 
-use App\Auth\Domain\Exception\MissingAuthContextException;
 use App\Auth\Domain\Exception\RoleNotAllowedException;
+use App\Shared\Domain\Exception\AuthenticationRequiredException;
 use App\Shared\Domain\ValueObject\UserRole;
 use App\Shared\Infrastructure\Auth\AuthContextHolder;
 use Closure;
@@ -31,7 +31,7 @@ class RequireRole
         $context = $this->authContextHolder->get();
 
         if ($context === null) {
-            throw MissingAuthContextException::missing();
+            throw AuthenticationRequiredException::missing();
         }
 
         if (! in_array($context->role()->value(), $allowedRoles, true)) {
