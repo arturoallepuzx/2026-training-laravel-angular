@@ -16,9 +16,12 @@ Route::prefix('/restaurants/{restaurantId}')
     ->whereUuid('restaurantId')
     ->group(function () {
         Route::prefix('/auth')->group(function () {
-            Route::post('/login', UserLoginPostController::class);
-            Route::post('/refresh', UserRefreshPostController::class);
-            Route::post('/logout', UserLogoutPostController::class);
+            Route::post('/login', UserLoginPostController::class)
+                ->middleware('throttle:5,1');
+            Route::post('/refresh', UserRefreshPostController::class)
+                ->middleware('throttle:30,1');
+            Route::post('/logout', UserLogoutPostController::class)
+                ->middleware('throttle:30,1');
             Route::get('/me', UserGetMeController::class)
                 ->middleware('auth.access_token');
         });
