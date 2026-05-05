@@ -24,11 +24,13 @@ use App\Shared\Infrastructure\Persistence\UserIdResolverInterface;
 use App\Tax\Domain\Interfaces\TaxRepositoryInterface;
 use App\Tax\Infrastructure\Persistence\Repositories\EloquentTaxRepository;
 use App\User\Domain\Interfaces\PasswordHasherInterface;
+use App\User\Domain\Interfaces\UserActiveSessionsFinderInterface;
 use App\User\Domain\Interfaces\UserAuthenticationGlobalRevokerInterface;
 use App\User\Domain\Interfaces\UserAuthenticationIssuerInterface;
 use App\User\Domain\Interfaces\UserAuthenticationRefresherInterface;
 use App\User\Domain\Interfaces\UserAuthenticationRevokerInterface;
 use App\User\Domain\Interfaces\UserRepositoryInterface;
+use App\User\Infrastructure\Persistence\Repositories\EloquentUserActiveSessionsFinder;
 use App\User\Infrastructure\Persistence\Repositories\EloquentUserRepository;
 use App\User\Infrastructure\Services\LaravelPasswordHasher;
 use Illuminate\Support\ServiceProvider;
@@ -45,6 +47,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(TaxRepositoryInterface::class, EloquentTaxRepository::class);
         $this->app->bind(RefreshTokenIssuerInterface::class, RandomRefreshTokenIssuer::class);
         $this->app->bind(RefreshTokenRepositoryInterface::class, EloquentRefreshTokenRepository::class);
+        $this->app->bind(
+            UserActiveSessionsFinderInterface::class,
+            EloquentUserActiveSessionsFinder::class,
+        );
 
         $this->app->scoped(AccessTokenIssuerInterface::class, function (): AccessTokenIssuerInterface {
             return new FirebaseJwtAccessTokenIssuer($this->jwtSecret());
