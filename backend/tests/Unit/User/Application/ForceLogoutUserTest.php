@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Unit\User\Application;
 
-use App\Shared\Domain\ValueObject\Email;
 use App\Shared\Domain\ValueObject\UserRole;
 use App\Shared\Domain\ValueObject\Uuid;
 use App\User\Application\ForceLogoutUser\ForceLogoutUser;
@@ -13,7 +12,6 @@ use App\User\Domain\Exception\UserNotFoundException;
 use App\User\Domain\Interfaces\UserAuthenticationGlobalRevokerInterface;
 use App\User\Domain\Interfaces\UserRepositoryInterface;
 use App\User\Domain\ValueObject\PasswordHash;
-use App\User\Domain\ValueObject\UserName;
 use Mockery;
 use PHPUnit\Framework\TestCase;
 
