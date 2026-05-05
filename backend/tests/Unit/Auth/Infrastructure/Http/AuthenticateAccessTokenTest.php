@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Tests\Unit\Auth\Infrastructure\Http;
 
 use App\Auth\Domain\Exception\ExpiredAccessTokenException;
-use App\Auth\Domain\Exception\InvalidAccessTokenException;
 use App\Auth\Domain\Interfaces\AccessTokenVerifierInterface;
 use App\Auth\Domain\ValueObject\AccessTokenPayload;
 use App\Auth\Infrastructure\Http\Middleware\AuthenticateAccessToken;
+use App\Shared\Domain\Exception\AuthenticationRequiredException;
 use App\Shared\Domain\ValueObject\DomainDateTime;
 use App\Shared\Domain\ValueObject\UserRole;
 use App\Shared\Domain\ValueObject\Uuid;
@@ -26,19 +26,19 @@ class AuthenticateAccessTokenTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_throws_invalid_when_authorization_header_missing(): void
+    public function test_throws_authentication_required_when_authorization_header_missing(): void
     {
         $verifier = Mockery::mock(AccessTokenVerifierInterface::class);
         $verifier->shouldNotReceive('verify');
 
         $middleware = new AuthenticateAccessToken($verifier, new AuthContextHolder);
 
-        $this->expectException(InvalidAccessTokenException::class);
+        $this->expectException(AuthenticationRequiredException::class);
 
         $middleware->handle(Request::create('/protected', 'GET'), fn () => new Response);
     }
 
-    public function test_throws_invalid_when_authorization_has_no_bearer_prefix(): void
+    public function test_throws_authentication_required_when_authorization_has_no_bearer_prefix(): void
     {
         $verifier = Mockery::mock(AccessTokenVerifierInterface::class);
         $verifier->shouldNotReceive('verify');
@@ -48,12 +48,12 @@ class AuthenticateAccessTokenTest extends TestCase
         $request = Request::create('/protected', 'GET');
         $request->headers->set('Authorization', 'Basic abc');
 
-        $this->expectException(InvalidAccessTokenException::class);
+        $this->expectException(AuthenticationRequiredException::class);
 
         $middleware->handle($request, fn () => new Response);
     }
 
-    public function test_throws_invalid_when_bearer_token_is_empty(): void
+    public function test_throws_authentication_required_when_bearer_token_is_empty(): void
     {
         $verifier = Mockery::mock(AccessTokenVerifierInterface::class);
         $verifier->shouldNotReceive('verify');
@@ -63,7 +63,7 @@ class AuthenticateAccessTokenTest extends TestCase
         $request = Request::create('/protected', 'GET');
         $request->headers->set('Authorization', 'Bearer ');
 
-        $this->expectException(InvalidAccessTokenException::class);
+        $this->expectException(AuthenticationRequiredException::class);
 
         $middleware->handle($request, fn () => new Response);
     }

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Auth\Infrastructure\Http\Middleware;
 
-use App\Auth\Domain\Exception\InvalidAccessTokenException;
 use App\Auth\Domain\Interfaces\AccessTokenVerifierInterface;
+use App\Shared\Domain\Exception\AuthenticationRequiredException;
 use App\Shared\Domain\ValueObject\AuthContext;
 use App\Shared\Infrastructure\Auth\AuthContextHolder;
 use Closure;
@@ -24,7 +24,7 @@ class AuthenticateAccessToken
         $token = $request->bearerToken();
 
         if ($token === null || $token === '') {
-            throw InvalidAccessTokenException::malformed();
+            throw AuthenticationRequiredException::missing();
         }
 
         $payload = $this->accessTokenVerifier->verify($token);
