@@ -100,7 +100,7 @@ class JwtUserAuthenticationRefresher implements UserAuthenticationRefresherInter
             $this->refreshTokenRepository->create($newIssuedRefresh->entity());
             $oldToken->markReplacedBy($newIssuedRefresh->entity()->id());
             $this->refreshTokenRepository->update($oldToken);
-        });
+        }, 3);
 
         return IssuedAuthentication::create(
             $newAccessToken->value(),
