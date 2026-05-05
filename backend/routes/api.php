@@ -5,6 +5,7 @@ use App\Tax\Infrastructure\Entrypoint\Http\GetAllController as TaxGetAllControll
 use App\Tax\Infrastructure\Entrypoint\Http\GetByIdController as TaxGetByIdController;
 use App\Tax\Infrastructure\Entrypoint\Http\PostController as TaxPostController;
 use App\Tax\Infrastructure\Entrypoint\Http\PutController as TaxPutController;
+use App\User\Infrastructure\Entrypoint\Http\ForceLogoutPostController as UserForceLogoutPostController;
 use App\User\Infrastructure\Entrypoint\Http\GetMeController as UserGetMeController;
 use App\User\Infrastructure\Entrypoint\Http\LoginPostController as UserLoginPostController;
 use App\User\Infrastructure\Entrypoint\Http\LogoutAllPostController as UserLogoutAllPostController;
@@ -31,6 +32,10 @@ Route::prefix('/restaurants/{restaurantId}')
 
         Route::post('/users', UserPostController::class)
             ->middleware(['auth.access_token', 'auth.restaurant', 'auth.role:admin']);
+
+        Route::post('/users/{userId}/force-logout', UserForceLogoutPostController::class)
+            ->whereUuid('userId')
+            ->middleware(['auth.access_token', 'auth.restaurant', 'auth.role:admin', 'throttle:30,1']);
 
         Route::prefix('/taxes')
             ->middleware(['auth.access_token', 'auth.restaurant'])
