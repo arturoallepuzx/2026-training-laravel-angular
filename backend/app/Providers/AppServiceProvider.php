@@ -11,6 +11,7 @@ use App\Auth\Domain\Interfaces\RefreshTokenRepositoryInterface;
 use App\Auth\Infrastructure\Persistence\Repositories\EloquentRefreshTokenRepository;
 use App\Auth\Infrastructure\Services\FirebaseJwtAccessTokenIssuer;
 use App\Auth\Infrastructure\Services\FirebaseJwtAccessTokenVerifier;
+use App\Auth\Infrastructure\Services\JwtUserAuthenticationGlobalRevoker;
 use App\Auth\Infrastructure\Services\JwtUserAuthenticationIssuer;
 use App\Auth\Infrastructure\Services\JwtUserAuthenticationRefresher;
 use App\Auth\Infrastructure\Services\JwtUserAuthenticationRevoker;
@@ -23,6 +24,7 @@ use App\Shared\Infrastructure\Persistence\UserIdResolverInterface;
 use App\Tax\Domain\Interfaces\TaxRepositoryInterface;
 use App\Tax\Infrastructure\Persistence\Repositories\EloquentTaxRepository;
 use App\User\Domain\Interfaces\PasswordHasherInterface;
+use App\User\Domain\Interfaces\UserAuthenticationGlobalRevokerInterface;
 use App\User\Domain\Interfaces\UserAuthenticationIssuerInterface;
 use App\User\Domain\Interfaces\UserAuthenticationRefresherInterface;
 use App\User\Domain\Interfaces\UserAuthenticationRevokerInterface;
@@ -79,6 +81,11 @@ class AppServiceProvider extends ServiceProvider
                 $app->make(UserRepositoryInterface::class),
             );
         });
+
+        $this->app->scoped(
+            UserAuthenticationGlobalRevokerInterface::class,
+            JwtUserAuthenticationGlobalRevoker::class,
+        );
 
         $this->app->scoped(RestaurantIdResolverInterface::class, EloquentRestaurantIdResolver::class);
         $this->app->scoped(UserIdResolverInterface::class, EloquentUserIdResolver::class);

@@ -17,4 +17,6 @@ interface RefreshTokenRepositoryInterface
     public function update(RefreshToken $refreshToken): void;
 
     public function revokeAllInSession(Uuid $sessionId): void;
+
+    public function revokeAllByUserId(Uuid $userId): void;
 }

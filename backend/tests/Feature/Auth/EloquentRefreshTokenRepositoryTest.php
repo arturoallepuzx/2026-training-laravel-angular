@@ -160,4 +160,66 @@ class EloquentRefreshTokenRepositoryTest extends TestCase
         $this->assertNotNull($reloadedActiveInB);
         $this->assertFalse($reloadedActiveInB->isRevoked(), 'token in session B must remain active');
     }
+
+    public function test_revoke_all_by_user_id_revokes_only_active_tokens_of_given_user(): void
+    {
+        $userA = EloquentUser::factory()->create();
+        $userB = EloquentUser::factory()->create();
+        $userAId = Uuid::create($userA->uuid);
+        $userBId = Uuid::create($userB->uuid);
+
+        $activeForUserA = RefreshToken::dddCreate(
+            $userAId,
+            Uuid::generate(),
+            $this->randomSecret(),
+            $this->futureExpiration(),
+        );
+        $alreadyRevokedForUserA = RefreshToken::dddCreate(
+            $userAId,
+            Uuid::generate(),
+            $this->randomSecret(),
+            $this->futureExpiration(),
+        );
+        $alreadyRevokedForUserA->revoke();
+        $previouslyRevokedAtSeconds = $alreadyRevokedForUserA->revokedAt()?->value()->getTimestamp();
+
+        $activeForUserB = RefreshToken::dddCreate(
+            $userBId,
+            Uuid::generate(),
+            $this->randomSecret(),
+            $this->futureExpiration(),
+        );
+
+        $repository = $this->repository();
+        $repository->create($activeForUserA);
+        $repository->create($alreadyRevokedForUserA);
+        $repository->create($activeForUserB);
+
+        $repository->revokeAllByUserId($userAId);
+
+        $reloadedActiveForUserA = $repository->findByTokenHash($activeForUserA->tokenHash());
+        $reloadedAlreadyRevokedForUserA = $repository->findByTokenHash($alreadyRevokedForUserA->tokenHash());
+        $reloadedActiveForUserB = $repository->findByTokenHash($activeForUserB->tokenHash());
+
+        $this->assertNotNull($reloadedActiveForUserA);
+        $this->assertTrue($reloadedActiveForUserA->isRevoked(), 'active token for user A must be revoked');
+
+        $this->assertNotNull($reloadedAlreadyRevokedForUserA);
+        $this->assertTrue($reloadedAlreadyRevokedForUserA->isRevoked());
+        $this->assertSame(
+            $previouslyRevokedAtSeconds,
+            $reloadedAlreadyRevokedForUserA->revokedAt()?->value()->getTimestamp(),
+            'already-revoked token must keep its original revoked_at',
+        );
+
+        $this->assertNotNull($reloadedActiveForUserB);
+        $this->assertFalse($reloadedActiveForUserB->isRevoked(), 'token for user B must remain active');
+    }
+
+    public function test_revoke_all_by_user_id_is_idempotent_when_user_does_not_exist(): void
+    {
+        $this->repository()->revokeAllByUserId(Uuid::generate());
+
+        $this->addToAssertionCount(1);
+    }
 }

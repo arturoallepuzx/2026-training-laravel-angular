@@ -76,6 +76,25 @@ class EloquentRefreshTokenRepository implements RefreshTokenRepositoryInterface
             ]);
     }
 
+    public function revokeAllByUserId(Uuid $userId): void
+    {
+        $now = DomainDateTime::now()->value();
+
+        try {
+            $internalUserId = $this->userIdResolver->toInternalId($userId);
+        } catch (ModelNotFoundException) {
+            return;
+        }
+
+        $this->model->newQuery()
+            ->where('user_id', $internalUserId)
+            ->whereNull('revoked_at')
+            ->update([
+                'revoked_at' => $now,
+                'updated_at' => $now,
+            ]);
+    }
+
     private function toDomainEntity(EloquentRefreshToken $model): RefreshToken
     {
         $replacedById = $model->replaced_by_id !== null

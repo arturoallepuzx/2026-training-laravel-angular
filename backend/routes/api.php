@@ -7,6 +7,7 @@ use App\Tax\Infrastructure\Entrypoint\Http\PostController as TaxPostController;
 use App\Tax\Infrastructure\Entrypoint\Http\PutController as TaxPutController;
 use App\User\Infrastructure\Entrypoint\Http\GetMeController as UserGetMeController;
 use App\User\Infrastructure\Entrypoint\Http\LoginPostController as UserLoginPostController;
+use App\User\Infrastructure\Entrypoint\Http\LogoutAllPostController as UserLogoutAllPostController;
 use App\User\Infrastructure\Entrypoint\Http\LogoutPostController as UserLogoutPostController;
 use App\User\Infrastructure\Entrypoint\Http\PostController as UserPostController;
 use App\User\Infrastructure\Entrypoint\Http\RefreshPostController as UserRefreshPostController;
@@ -22,6 +23,8 @@ Route::prefix('/restaurants/{restaurantId}')
                 ->middleware('throttle:30,1');
             Route::post('/logout', UserLogoutPostController::class)
                 ->middleware('throttle:30,1');
+            Route::post('/logout-all', UserLogoutAllPostController::class)
+                ->middleware(['auth.access_token', 'auth.restaurant', 'throttle:30,1']);
             Route::get('/me', UserGetMeController::class)
                 ->middleware('auth.access_token');
         });
