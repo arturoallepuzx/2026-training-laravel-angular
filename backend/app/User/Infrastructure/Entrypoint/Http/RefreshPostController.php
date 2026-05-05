@@ -6,7 +6,7 @@ namespace App\User\Infrastructure\Entrypoint\Http;
 
 use App\User\Application\RefreshAuthentication\RefreshAuthentication;
 use App\User\Application\RefreshAuthentication\RefreshAuthenticationResponse;
-use App\User\Infrastructure\Entrypoint\Http\Requests\RefreshUserRequest;
+use App\User\Infrastructure\Entrypoint\Http\Requests\TenantRouteRequest;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Cookie;
 
@@ -16,7 +16,7 @@ class RefreshPostController
         private RefreshAuthentication $refreshAuthentication,
     ) {}
 
-    public function __invoke(RefreshUserRequest $request, string $restaurantId): JsonResponse
+    public function __invoke(TenantRouteRequest $request, string $restaurantId): JsonResponse
     {
         $refreshCredential = (string) $request->cookies->get('refresh_token', '');
 

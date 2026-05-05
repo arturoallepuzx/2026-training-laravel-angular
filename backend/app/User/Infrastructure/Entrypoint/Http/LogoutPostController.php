@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\User\Infrastructure\Entrypoint\Http;
 
 use App\User\Application\LogoutUser\LogoutUser;
-use App\User\Infrastructure\Entrypoint\Http\Requests\LogoutUserRequest;
+use App\User\Infrastructure\Entrypoint\Http\Requests\TenantRouteRequest;
 use Illuminate\Http\Response;
 use Symfony\Component\HttpFoundation\Cookie;
 
@@ -15,7 +15,7 @@ class LogoutPostController
         private LogoutUser $logoutUser,
     ) {}
 
-    public function __invoke(LogoutUserRequest $request, string $restaurantId): Response
+    public function __invoke(TenantRouteRequest $request, string $restaurantId): Response
     {
         $refreshCredential = (string) $request->cookies->get('refresh_token', '');
 

@@ -6,7 +6,7 @@ namespace App\User\Infrastructure\Entrypoint\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class LogoutUserRequest extends FormRequest
+class TenantRouteRequest extends FormRequest
 {
     public function authorize(): bool
     {
