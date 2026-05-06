@@ -22,18 +22,18 @@ class RateLimitTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_login_route_is_rate_limited_after_five_attempts_per_minute(): void
+    public function test_login_route_is_rate_limited_after_ten_attempts_per_minute(): void
     {
         $useCase = Mockery::mock(LoginUser::class);
         $useCase->shouldReceive('__invoke')
-            ->times(5)
+            ->times(10)
             ->with(self::RESTAURANT_ID, 'rate@example.com', 'wrong-password')
             ->andThrow(InvalidCredentialsException::invalid());
 
         $this->app->instance(LoginUser::class, $useCase);
         $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.1']);
 
-        for ($attempt = 1; $attempt <= 5; $attempt++) {
+        for ($attempt = 1; $attempt <= 10; $attempt++) {
             $response = $this->postJson('/api/restaurants/'.self::RESTAURANT_ID.'/auth/login', [
                 'email' => 'rate@example.com',
                 'password' => 'wrong-password',
