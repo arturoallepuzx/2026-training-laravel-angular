@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace Tests\Unit\User\Application;
 
 use App\Shared\Domain\Exception\AuthenticationRequiredException;
-use App\Shared\Domain\ValueObject\AuthContext;
 use App\Shared\Domain\ValueObject\UserRole;
 use App\Shared\Domain\ValueObject\Uuid;
-use App\Shared\Infrastructure\Auth\AuthContextHolder;
 use App\User\Application\GetAuthenticatedUser\GetAuthenticatedUser;
 use App\User\Application\GetAuthenticatedUser\GetAuthenticatedUserResponse;
 use App\User\Domain\Entity\User;
@@ -25,13 +23,10 @@ class GetAuthenticatedUserTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_invoke_returns_response_with_user_data_when_context_and_user_exist(): void
+    public function test_invoke_returns_response_with_user_data_when_user_exists(): void
     {
         $restaurantId = Uuid::generate();
         $userId = Uuid::generate();
-
-        $holder = new AuthContextHolder;
-        $holder->bind(AuthContext::create($userId, $restaurantId, UserRole::admin(), Uuid::generate()));
 
         $user = $this->buildUser($userId, $restaurantId);
 
@@ -44,9 +39,9 @@ class GetAuthenticatedUserTest extends TestCase
             )
             ->andReturn($user);
 
-        $useCase = new GetAuthenticatedUser($holder, $userRepository);
+        $useCase = new GetAuthenticatedUser($userRepository);
 
-        $response = $useCase($restaurantId->value());
+        $response = $useCase($restaurantId->value(), $userId->value());
 
         $this->assertInstanceOf(GetAuthenticatedUserResponse::class, $response);
         $this->assertSame([
@@ -61,36 +56,16 @@ class GetAuthenticatedUserTest extends TestCase
         ], $response->toArray());
     }
 
-    public function test_invoke_throws_authentication_required_when_no_context_bound(): void
+    public function test_invoke_throws_authentication_required_when_user_not_found(): void
     {
-        $userRepository = Mockery::mock(UserRepositoryInterface::class);
-        $userRepository->shouldNotReceive('findById');
-
-        $useCase = new GetAuthenticatedUser(new AuthContextHolder, $userRepository);
-
-        $this->expectException(AuthenticationRequiredException::class);
-
-        $useCase(Uuid::generate()->value());
-    }
-
-    public function test_invoke_throws_authentication_required_when_user_not_found_in_restaurant(): void
-    {
-        $holder = new AuthContextHolder;
-        $holder->bind(AuthContext::create(
-            Uuid::generate(),
-            Uuid::generate(),
-            UserRole::operator(),
-            Uuid::generate(),
-        ));
-
         $userRepository = Mockery::mock(UserRepositoryInterface::class);
         $userRepository->shouldReceive('findById')->once()->andReturn(null);
 
-        $useCase = new GetAuthenticatedUser($holder, $userRepository);
+        $useCase = new GetAuthenticatedUser($userRepository);
 
         $this->expectException(AuthenticationRequiredException::class);
 
-        $useCase(Uuid::generate()->value());
+        $useCase(Uuid::generate()->value(), Uuid::generate()->value());
     }
 
     private function buildUser(Uuid $id, Uuid $restaurantId): User

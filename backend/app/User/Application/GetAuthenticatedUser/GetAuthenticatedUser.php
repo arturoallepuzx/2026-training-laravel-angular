@@ -6,26 +6,18 @@ namespace App\User\Application\GetAuthenticatedUser;
 
 use App\Shared\Domain\Exception\AuthenticationRequiredException;
 use App\Shared\Domain\ValueObject\Uuid;
-use App\Shared\Infrastructure\Auth\AuthContextHolder;
 use App\User\Domain\Interfaces\UserRepositoryInterface;
 
 class GetAuthenticatedUser
 {
     public function __construct(
-        private AuthContextHolder $authContextHolder,
         private UserRepositoryInterface $userRepository,
     ) {}
 
-    public function __invoke(string $restaurantId): GetAuthenticatedUserResponse
+    public function __invoke(string $restaurantId, string $userId): GetAuthenticatedUserResponse
     {
-        $context = $this->authContextHolder->get();
-
-        if ($context === null) {
-            throw AuthenticationRequiredException::missing();
-        }
-
         $user = $this->userRepository->findById(
-            $context->userId(),
+            Uuid::create($userId),
             Uuid::create($restaurantId),
         );
 
