@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Tax\Application\GetAllTaxes;
+namespace App\Tax\Application\ListTaxes;
 
 use App\Tax\Domain\Entity\Tax;
 
-final readonly class GetAllTaxesResponse
+final readonly class ListTaxesResponse
 {
     /** @param array<int, array<string, mixed>> $taxes */
     public function __construct(
