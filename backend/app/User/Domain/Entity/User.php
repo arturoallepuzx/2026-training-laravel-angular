@@ -78,6 +78,36 @@ class User
         );
     }
 
+    public function updateName(UserName $name): void
+    {
+        $this->name = $name;
+        $this->touch();
+    }
+
+    public function updateEmail(Email $email): void
+    {
+        $this->email = $email;
+        $this->touch();
+    }
+
+    public function updateRole(UserRole $role): void
+    {
+        $this->role = $role;
+        $this->touch();
+    }
+
+    public function updateImageSrc(?string $imageSrc): void
+    {
+        $this->imageSrc = $imageSrc;
+        $this->touch();
+    }
+
+    public function changePassword(PasswordHash $passwordHash): void
+    {
+        $this->passwordHash = $passwordHash;
+        $this->touch();
+    }
+
     public function id(): Uuid
     {
         return $this->id;
@@ -126,5 +156,10 @@ class User
     public function updatedAt(): DomainDateTime
     {
         return $this->updatedAt;
+    }
+
+    private function touch(): void
+    {
+        $this->updatedAt = DomainDateTime::now();
     }
 }

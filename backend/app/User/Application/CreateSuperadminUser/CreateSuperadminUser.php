@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\User\Application\CreateUser;
+namespace App\User\Application\CreateSuperadminUser;
 
 use App\Shared\Domain\ValueObject\Email;
 use App\Shared\Domain\ValueObject\UserRole;
@@ -12,9 +12,8 @@ use App\User\Domain\Exception\UserEmailAlreadyExistsException;
 use App\User\Domain\Interfaces\PasswordHasherInterface;
 use App\User\Domain\Interfaces\UserRepositoryInterface;
 use App\User\Domain\ValueObject\UserName;
-use App\User\Domain\ValueObject\UserPin;
 
-class CreateUser
+class CreateSuperadminUser
 {
     public function __construct(
         private UserRepositoryInterface $userRepository,
@@ -22,14 +21,11 @@ class CreateUser
     ) {}
 
     public function __invoke(
-        string $restaurantId,
-        string $role,
+        string $superadminRestaurantId,
         string $name,
         string $email,
         string $plainPassword,
-        ?string $pin = null,
-        ?string $imageSrc = null,
-    ): CreateUserResponse {
+    ): CreateSuperadminUserResponse {
         $emailVo = Email::create($email);
 
         if ($this->userRepository->existsByEmail($emailVo)) {
@@ -37,17 +33,17 @@ class CreateUser
         }
 
         $user = User::dddCreate(
-            Uuid::create($restaurantId),
-            UserRole::createTenantRole($role),
+            Uuid::create($superadminRestaurantId),
+            UserRole::superadmin(),
             UserName::create($name),
             $emailVo,
             $this->passwordHasher->hash($plainPassword),
-            $pin !== null ? UserPin::create($pin) : null,
-            $imageSrc,
+            null,
+            null,
         );
 
         $this->userRepository->create($user);
 
-        return CreateUserResponse::create($user);
+        return CreateSuperadminUserResponse::create($user);
     }
 }

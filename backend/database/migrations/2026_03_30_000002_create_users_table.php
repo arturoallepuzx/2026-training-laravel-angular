@@ -23,6 +23,8 @@ return new class extends Migration
             $table->string('pin')->nullable();
             $table->timestamps();
             $table->softDeletes();
+
+            $table->index(['restaurant_id', 'created_at']);
         });
     }
 

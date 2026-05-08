@@ -8,7 +8,6 @@ use App\User\Application\CreateUser\CreateUser;
 use App\User\Infrastructure\Entrypoint\Http\Requests\CreateUserRequest;
 use Illuminate\Http\JsonResponse;
 
-// TODO(step 13): add middleware auth.access_token + tenant.matches + role:admin
 class PostController
 {
     public function __construct(
