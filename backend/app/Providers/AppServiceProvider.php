@@ -16,11 +16,15 @@ use App\Auth\Infrastructure\Services\JwtUserAuthenticationIssuer;
 use App\Auth\Infrastructure\Services\JwtUserAuthenticationRefresher;
 use App\Auth\Infrastructure\Services\JwtUserAuthenticationRevoker;
 use App\Auth\Infrastructure\Services\RandomRefreshTokenIssuer;
+use App\Restaurant\Domain\Interfaces\RestaurantRepositoryInterface;
+use App\Restaurant\Infrastructure\Persistence\Repositories\EloquentRestaurantRepository;
+use App\Shared\Domain\Interfaces\TransactionRunnerInterface;
 use App\Shared\Infrastructure\Auth\AuthContextHolder;
 use App\Shared\Infrastructure\Persistence\EloquentRestaurantIdResolver;
 use App\Shared\Infrastructure\Persistence\EloquentUserIdResolver;
 use App\Shared\Infrastructure\Persistence\RestaurantIdResolverInterface;
 use App\Shared\Infrastructure\Persistence\UserIdResolverInterface;
+use App\Shared\Infrastructure\Services\LaravelTransactionRunner;
 use App\Tax\Domain\Interfaces\TaxRepositoryInterface;
 use App\Tax\Infrastructure\Persistence\Repositories\EloquentTaxRepository;
 use App\User\Domain\Interfaces\PasswordHasherInterface;
@@ -45,6 +49,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(UserRepositoryInterface::class, EloquentUserRepository::class);
         $this->app->bind(PasswordHasherInterface::class, LaravelPasswordHasher::class);
         $this->app->bind(TaxRepositoryInterface::class, EloquentTaxRepository::class);
+        $this->app->bind(RestaurantRepositoryInterface::class, EloquentRestaurantRepository::class);
         $this->app->bind(RefreshTokenIssuerInterface::class, RandomRefreshTokenIssuer::class);
         $this->app->bind(RefreshTokenRepositoryInterface::class, EloquentRefreshTokenRepository::class);
         $this->app->bind(
@@ -76,6 +81,7 @@ class AppServiceProvider extends ServiceProvider
                 $app->make(UserRepositoryInterface::class),
                 $app->make(AccessTokenIssuerInterface::class),
                 $app->make(RefreshTokenIssuerInterface::class),
+                $app->make(TransactionRunnerInterface::class),
                 $this->accessTtlSeconds(),
                 $this->refreshTtlSeconds(),
             );
@@ -96,6 +102,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(RestaurantIdResolverInterface::class, EloquentRestaurantIdResolver::class);
         $this->app->scoped(UserIdResolverInterface::class, EloquentUserIdResolver::class);
         $this->app->scoped(AuthContextHolder::class);
+        $this->app->bind(TransactionRunnerInterface::class, LaravelTransactionRunner::class);
     }
 
     /**
