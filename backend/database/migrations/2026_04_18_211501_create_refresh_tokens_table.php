@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('refresh_tokens', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
-            $table->uuid('session_uuid')->index();
+            $table->uuid('session_uuid');
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->char('token_hash', 64)->unique();
             $table->timestamp('expires_at');
@@ -22,6 +22,7 @@ return new class extends Migration
                 ->nullOnDelete();
             $table->timestamps();
 
+            $table->index(['session_uuid', 'revoked_at']);
             $table->index(['user_id', 'revoked_at']);
             $table->index('expires_at');
         });

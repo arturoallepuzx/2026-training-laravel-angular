@@ -12,12 +12,12 @@ use App\Auth\Domain\Interfaces\RefreshTokenIssuerInterface;
 use App\Auth\Domain\Interfaces\RefreshTokenRepositoryInterface;
 use App\Auth\Domain\ValueObject\AccessTokenPayload;
 use App\Auth\Domain\ValueObject\RefreshTokenSecret;
+use App\Shared\Domain\Interfaces\TransactionRunnerInterface;
 use App\Shared\Domain\ValueObject\DomainDateTime;
 use App\Shared\Domain\ValueObject\Uuid;
 use App\User\Domain\Interfaces\UserAuthenticationRefresherInterface;
 use App\User\Domain\Interfaces\UserRepositoryInterface;
 use App\User\Domain\ValueObject\IssuedAuthentication;
-use Illuminate\Support\Facades\DB;
 
 class JwtUserAuthenticationRefresher implements UserAuthenticationRefresherInterface
 {
@@ -26,6 +26,7 @@ class JwtUserAuthenticationRefresher implements UserAuthenticationRefresherInter
         private UserRepositoryInterface $userRepository,
         private AccessTokenIssuerInterface $accessTokenIssuer,
         private RefreshTokenIssuerInterface $refreshTokenIssuer,
+        private TransactionRunnerInterface $transactionRunner,
         private int $accessTtlSeconds,
         private int $refreshTtlSeconds,
     ) {
@@ -50,63 +51,72 @@ class JwtUserAuthenticationRefresher implements UserAuthenticationRefresherInter
             throw InvalidRefreshTokenException::notFound();
         }
 
-        $oldToken = $this->refreshTokenRepository->findByTokenHash($secret->hash());
+        $reuseDetectedSessionId = null;
 
-        if ($oldToken === null) {
-            throw InvalidRefreshTokenException::notFound();
-        }
+        $authentication = $this->transactionRunner->run(function () use ($secret, $restaurantId, &$reuseDetectedSessionId): ?IssuedAuthentication {
+            $oldToken = $this->refreshTokenRepository->findByTokenHash($secret->hash());
 
-        if ($oldToken->isExpired()) {
-            throw ExpiredRefreshTokenException::expiredAt($oldToken->expiresAt());
-        }
+            if ($oldToken === null) {
+                throw InvalidRefreshTokenException::notFound();
+            }
 
-        if ($oldToken->isRevoked() && $oldToken->replacedById() !== null) {
-            $this->refreshTokenRepository->revokeAllInSession($oldToken->sessionId());
+            if ($oldToken->isExpired()) {
+                throw ExpiredRefreshTokenException::expiredAt($oldToken->expiresAt());
+            }
 
-            throw RefreshTokenReuseDetectedException::forSession($oldToken->sessionId());
-        }
+            if ($oldToken->isRevoked() && $oldToken->replacedById() !== null) {
+                $this->refreshTokenRepository->revokeAllInSession($oldToken->sessionId());
+                $reuseDetectedSessionId = $oldToken->sessionId();
 
-        if ($oldToken->isRevoked()) {
-            throw InvalidRefreshTokenException::notFound();
-        }
+                return null;
+            }
 
-        $user = $this->userRepository->findById($oldToken->userId(), $restaurantId);
+            if ($oldToken->isRevoked()) {
+                throw InvalidRefreshTokenException::notFound();
+            }
 
-        if ($user === null) {
-            throw InvalidRefreshTokenException::notFound();
-        }
+            $user = $this->userRepository->findById($oldToken->userId(), $restaurantId);
 
-        $now = DomainDateTime::now();
-        $sessionId = $oldToken->sessionId();
+            if ($user === null) {
+                throw InvalidRefreshTokenException::notFound();
+            }
 
-        $newAccessToken = $this->accessTokenIssuer->issue(
-            AccessTokenPayload::create(
+            $now = DomainDateTime::now();
+            $sessionId = $oldToken->sessionId();
+
+            $newAccessToken = $this->accessTokenIssuer->issue(
+                AccessTokenPayload::create(
+                    $user->id(),
+                    $user->restaurantId(),
+                    $user->role(),
+                    $sessionId,
+                    $now,
+                    DomainDateTime::create($now->value()->modify('+'.$this->accessTtlSeconds.' seconds')),
+                )
+            );
+
+            $newIssuedRefresh = $this->refreshTokenIssuer->issue(
                 $user->id(),
-                $user->restaurantId(),
-                $user->role(),
                 $sessionId,
-                $now,
-                DomainDateTime::create($now->value()->modify('+'.$this->accessTtlSeconds.' seconds')),
-            )
-        );
+                DomainDateTime::create($now->value()->modify('+'.$this->refreshTtlSeconds.' seconds')),
+            );
 
-        $newIssuedRefresh = $this->refreshTokenIssuer->issue(
-            $user->id(),
-            $sessionId,
-            DomainDateTime::create($now->value()->modify('+'.$this->refreshTtlSeconds.' seconds')),
-        );
-
-        DB::transaction(function () use ($oldToken, $newIssuedRefresh): void {
             $this->refreshTokenRepository->create($newIssuedRefresh->entity());
             $oldToken->markReplacedBy($newIssuedRefresh->entity()->id());
             $this->refreshTokenRepository->update($oldToken);
-        }, 3);
 
-        return IssuedAuthentication::create(
-            $newAccessToken->value(),
-            $newAccessToken->expiresAt(),
-            $newIssuedRefresh->secret()->value(),
-            $newIssuedRefresh->entity()->expiresAt(),
-        );
+            return IssuedAuthentication::create(
+                $newAccessToken->value(),
+                $newAccessToken->expiresAt(),
+                $newIssuedRefresh->secret()->value(),
+                $newIssuedRefresh->entity()->expiresAt(),
+            );
+        });
+
+        if ($reuseDetectedSessionId !== null) {
+            throw RefreshTokenReuseDetectedException::forSession($reuseDetectedSessionId);
+        }
+
+        return $authentication;
     }
 }

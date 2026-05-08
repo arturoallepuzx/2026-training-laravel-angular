@@ -41,6 +41,7 @@ class EloquentRefreshTokenRepository implements RefreshTokenRepositoryInterface
     {
         $model = $this->model->newQuery()
             ->where('token_hash', $tokenHash->value())
+            ->lockForUpdate()
             ->first();
 
         if ($model === null) {
