@@ -16,6 +16,7 @@ use App\Auth\Domain\ValueObject\AccessTokenPayload;
 use App\Auth\Domain\ValueObject\IssuedRefreshToken;
 use App\Auth\Domain\ValueObject\RefreshTokenSecret;
 use App\Auth\Infrastructure\Services\JwtUserAuthenticationRefresher;
+use App\Shared\Domain\Interfaces\TransactionRunnerInterface;
 use App\Shared\Domain\ValueObject\DomainDateTime;
 use App\Shared\Domain\ValueObject\Uuid;
 use App\User\Domain\Entity\User;
@@ -268,9 +269,21 @@ class JwtUserAuthenticationRefresherTest extends TestCase
             $userRepository ?? Mockery::mock(UserRepositoryInterface::class),
             $accessTokenIssuer ?? Mockery::mock(AccessTokenIssuerInterface::class),
             $refreshTokenIssuer ?? Mockery::mock(RefreshTokenIssuerInterface::class),
+            $this->fakeTransactionRunner(),
             $accessTtlSeconds,
             $refreshTtlSeconds,
         );
+    }
+
+    private function fakeTransactionRunner(): TransactionRunnerInterface
+    {
+        return new class implements TransactionRunnerInterface
+        {
+            public function run(callable $callback, int $attempts = 3): mixed
+            {
+                return $callback();
+            }
+        };
     }
 
     private function randomSecret(): RefreshTokenSecret

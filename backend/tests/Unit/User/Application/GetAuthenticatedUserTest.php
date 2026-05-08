@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Unit\User\Application;
 
 use App\Shared\Domain\Exception\AuthenticationRequiredException;
-use App\Shared\Domain\ValueObject\UserRole;
 use App\Shared\Domain\ValueObject\Uuid;
 use App\User\Application\GetAuthenticatedUser\GetAuthenticatedUser;
 use App\User\Application\GetAuthenticatedUser\GetAuthenticatedUserResponse;

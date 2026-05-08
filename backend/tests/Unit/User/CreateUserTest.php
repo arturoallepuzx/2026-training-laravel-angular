@@ -29,6 +29,10 @@ class CreateUserTest extends TestCase
         $hashedPassword = '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi';
         $restaurantId = '550e8400-e29b-41d4-a716-446655440000';
 
+        $repository->shouldReceive('existsByEmail')
+            ->once()
+            ->andReturn(false);
+
         $passwordHasher->shouldReceive('hash')
             ->once()
             ->with('plain-password')
