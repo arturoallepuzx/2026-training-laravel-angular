@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('legal_name');
             $table->string('tax_id');
             $table->string('email')->unique();
-            $table->string('password');
+            $table->string('password')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

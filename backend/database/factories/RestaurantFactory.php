@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Restaurant\Infrastructure\Persistence\Models\EloquentRestaurant;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 /**
@@ -14,8 +13,6 @@ class RestaurantFactory extends Factory
 {
     protected $model = EloquentRestaurant::class;
 
-    protected static ?string $password;
-
     public function definition(): array
     {
         return [
@@ -24,7 +21,7 @@ class RestaurantFactory extends Factory
             'legal_name' => fake()->company().' S.L.',
             'tax_id' => 'B'.fake()->randomNumber(8, true),
             'email' => fake()->unique()->companyEmail(),
-            'password' => static::$password ??= Hash::make('password'),
+            'password' => null,
         ];
     }
 }
