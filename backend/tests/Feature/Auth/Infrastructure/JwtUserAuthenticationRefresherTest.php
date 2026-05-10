@@ -322,7 +322,7 @@ class JwtUserAuthenticationRefresherTest extends TestCase
             name: 'Refresher User',
             email: 'refresher@example.com',
             passwordHash: PasswordHash::create('$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi')->value(),
-            pin: null,
+            pinHash: null,
             imageSrc: null,
             createdAt: new \DateTimeImmutable,
             updatedAt: new \DateTimeImmutable,

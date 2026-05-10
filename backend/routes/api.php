@@ -20,6 +20,7 @@ use App\User\Infrastructure\Entrypoint\Http\GetUsersWithActiveSessionsController
 use App\User\Infrastructure\Entrypoint\Http\LoginPostController as UserLoginPostController;
 use App\User\Infrastructure\Entrypoint\Http\LogoutAllPostController as UserLogoutAllPostController;
 use App\User\Infrastructure\Entrypoint\Http\LogoutPostController as UserLogoutPostController;
+use App\User\Infrastructure\Entrypoint\Http\PinLoginPostController as UserPinLoginPostController;
 use App\User\Infrastructure\Entrypoint\Http\PostController as UserPostController;
 use App\User\Infrastructure\Entrypoint\Http\PutController as UserPutController;
 use App\User\Infrastructure\Entrypoint\Http\RefreshPostController as UserRefreshPostController;
@@ -53,6 +54,8 @@ Route::prefix('/restaurants/{restaurantId}')
 
         Route::prefix('/auth')->group(function () {
             Route::post('/login', UserLoginPostController::class)
+                ->middleware('throttle:10,1');
+            Route::post('/pin-login', UserPinLoginPostController::class)
                 ->middleware('throttle:10,1');
             Route::post('/refresh', UserRefreshPostController::class)
                 ->middleware('throttle:30,1');

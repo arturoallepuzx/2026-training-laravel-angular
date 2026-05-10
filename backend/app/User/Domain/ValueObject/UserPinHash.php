@@ -4,22 +4,21 @@ declare(strict_types=1);
 
 namespace App\User\Domain\ValueObject;
 
-class UserPin
+class UserPinHash
 {
-    private const LENGTH = 4;
+    private const MIN_LENGTH = 60;
+
+    private const MAX_LENGTH = 255;
 
     private string $value;
 
     private function __construct(string $value)
     {
-        if (strlen($value) !== self::LENGTH) {
+        $length = strlen($value);
+        if ($length < self::MIN_LENGTH || $length > self::MAX_LENGTH) {
             throw new \InvalidArgumentException(
-                sprintf('User PIN must be exactly %d digits.', self::LENGTH)
+                sprintf('User PIN hash must be between %d and %d characters.', self::MIN_LENGTH, self::MAX_LENGTH)
             );
-        }
-
-        if (! ctype_digit($value)) {
-            throw new \InvalidArgumentException('User PIN must contain only digits.');
         }
 
         $this->value = $value;
@@ -33,10 +32,5 @@ class UserPin
     public function value(): string
     {
         return $this->value;
-    }
-
-    public function equals(self $other): bool
-    {
-        return hash_equals($this->value, $other->value);
     }
 }

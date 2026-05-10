@@ -40,7 +40,7 @@ class UserSeeder extends Seeder
             'name' => 'Admin User',
             'email' => 'admin@tpv.test',
             'role' => 'admin',
-            'pin' => '1111',
+            'pin' => Hash::make('1111'),
         ]);
 
         EloquentUser::factory()->create([
@@ -48,7 +48,7 @@ class UserSeeder extends Seeder
             'name' => 'Supervisor User',
             'email' => 'supervisor@tpv.test',
             'role' => 'supervisor',
-            'pin' => '2222',
+            'pin' => Hash::make('2222'),
         ]);
 
         EloquentUser::factory(3)->create([

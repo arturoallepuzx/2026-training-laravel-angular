@@ -10,7 +10,7 @@ use App\Shared\Domain\ValueObject\UserRole;
 use App\Shared\Domain\ValueObject\Uuid;
 use App\User\Domain\ValueObject\PasswordHash;
 use App\User\Domain\ValueObject\UserName;
-use App\User\Domain\ValueObject\UserPin;
+use App\User\Domain\ValueObject\UserPinHash;
 
 class User
 {
@@ -21,7 +21,7 @@ class User
         private UserName $name,
         private Email $email,
         private PasswordHash $passwordHash,
-        private ?UserPin $pin,
+        private ?UserPinHash $pinHash,
         private ?string $imageSrc,
         private DomainDateTime $createdAt,
         private DomainDateTime $updatedAt,
@@ -33,7 +33,7 @@ class User
         UserName $name,
         Email $email,
         PasswordHash $passwordHash,
-        ?UserPin $pin = null,
+        ?UserPinHash $pinHash = null,
         ?string $imageSrc = null,
     ): self {
         $now = DomainDateTime::now();
@@ -45,7 +45,7 @@ class User
             $name,
             $email,
             $passwordHash,
-            $pin,
+            $pinHash,
             $imageSrc,
             $now,
             $now,
@@ -59,7 +59,7 @@ class User
         string $name,
         string $email,
         string $passwordHash,
-        ?string $pin,
+        ?string $pinHash,
         ?string $imageSrc,
         \DateTimeImmutable $createdAt,
         \DateTimeImmutable $updatedAt,
@@ -71,7 +71,7 @@ class User
             UserName::create($name),
             Email::create($email),
             PasswordHash::create($passwordHash),
-            $pin !== null ? UserPin::create($pin) : null,
+            $pinHash !== null ? UserPinHash::create($pinHash) : null,
             $imageSrc,
             DomainDateTime::create($createdAt),
             DomainDateTime::create($updatedAt),
@@ -138,9 +138,9 @@ class User
         return $this->passwordHash;
     }
 
-    public function pin(): ?UserPin
+    public function pinHash(): ?UserPinHash
     {
-        return $this->pin;
+        return $this->pinHash;
     }
 
     public function imageSrc(): ?string

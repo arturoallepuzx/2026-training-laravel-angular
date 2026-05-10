@@ -10,15 +10,16 @@ use App\Shared\Domain\ValueObject\Uuid;
 use App\User\Domain\Entity\User;
 use App\User\Domain\Exception\UserEmailAlreadyExistsException;
 use App\User\Domain\Interfaces\PasswordHasherInterface;
+use App\User\Domain\Interfaces\PinHasherInterface;
 use App\User\Domain\Interfaces\UserRepositoryInterface;
 use App\User\Domain\ValueObject\UserName;
-use App\User\Domain\ValueObject\UserPin;
 
 class CreateUser
 {
     public function __construct(
         private UserRepositoryInterface $userRepository,
         private PasswordHasherInterface $passwordHasher,
+        private PinHasherInterface $pinHasher,
     ) {}
 
     public function __invoke(
@@ -42,7 +43,7 @@ class CreateUser
             UserName::create($name),
             $emailVo,
             $this->passwordHasher->hash($plainPassword),
-            $pin !== null ? UserPin::create($pin) : null,
+            $pin !== null ? $this->pinHasher->hash($pin) : null,
             $imageSrc,
         );
 

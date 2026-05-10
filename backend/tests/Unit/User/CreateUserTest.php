@@ -8,8 +8,10 @@ use App\User\Application\CreateUser\CreateUser;
 use App\User\Application\CreateUser\CreateUserResponse;
 use App\User\Domain\Entity\User;
 use App\User\Domain\Interfaces\PasswordHasherInterface;
+use App\User\Domain\Interfaces\PinHasherInterface;
 use App\User\Domain\Interfaces\UserRepositoryInterface;
 use App\User\Domain\ValueObject\PasswordHash;
+use App\User\Domain\ValueObject\UserPinHash;
 use Mockery;
 use PHPUnit\Framework\TestCase;
 
@@ -25,8 +27,10 @@ class CreateUserTest extends TestCase
     {
         $repository = Mockery::mock(UserRepositoryInterface::class);
         $passwordHasher = Mockery::mock(PasswordHasherInterface::class);
+        $pinHasher = Mockery::mock(PinHasherInterface::class);
 
         $hashedPassword = '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi';
+        $hashedPin = '$2y$10$e0NRiAABtmjItdqEGaKYGeqexOPHSjbgWQLJFfh6jUSGH/nVgqUUG';
         $restaurantId = '550e8400-e29b-41d4-a716-446655440000';
 
         $repository->shouldReceive('existsByEmail')
@@ -38,19 +42,24 @@ class CreateUserTest extends TestCase
             ->with('plain-password')
             ->andReturn(PasswordHash::create($hashedPassword));
 
+        $pinHasher->shouldReceive('hash')
+            ->once()
+            ->with('1234')
+            ->andReturn(UserPinHash::create($hashedPin));
+
         $repository->shouldReceive('create')
             ->once()
-            ->with(Mockery::on(function (User $user) use ($hashedPassword, $restaurantId) {
+            ->with(Mockery::on(function (User $user) use ($hashedPassword, $hashedPin, $restaurantId) {
                 return $user->restaurantId()->value() === $restaurantId
                     && $user->role()->isAdmin()
                     && $user->name()->value() === 'Create User'
                     && $user->email()->value() === 'create@example.com'
                     && $user->passwordHash()->value() === $hashedPassword
-                    && $user->pin()?->value() === '1234'
+                    && $user->pinHash()?->value() === $hashedPin
                     && $user->imageSrc() === 'avatar.png';
             }));
 
-        $createUser = new CreateUser($repository, $passwordHasher);
+        $createUser = new CreateUser($repository, $passwordHasher, $pinHasher);
         $response = $createUser(
             $restaurantId,
             'admin',

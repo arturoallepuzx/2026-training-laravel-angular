@@ -33,7 +33,7 @@ class EloquentUserRepository implements UserRepositoryInterface
                 'name' => $user->name()->value(),
                 'email' => $user->email()->value(),
                 'password' => $user->passwordHash()->value(),
-                'pin' => $user->pin()?->value(),
+                'pin' => $user->pinHash()?->value(),
                 'created_at' => $user->createdAt()->value(),
                 'updated_at' => $user->updatedAt()->value(),
             ]);
@@ -58,7 +58,7 @@ class EloquentUserRepository implements UserRepositoryInterface
                     'name' => $user->name()->value(),
                     'email' => $user->email()->value(),
                     'password' => $user->passwordHash()->value(),
-                    'pin' => $user->pin()?->value(),
+                    'pin' => $user->pinHash()?->value(),
                     'updated_at' => $user->updatedAt()->value(),
                 ]);
         } catch (QueryException $e) {

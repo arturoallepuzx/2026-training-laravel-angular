@@ -12,6 +12,8 @@ use App\Shared\Domain\ValueObject\UserRole;
 use App\Shared\Domain\ValueObject\Uuid;
 use Firebase\JWT\JWT;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class CreateUserTest extends TestCase
@@ -72,6 +74,12 @@ class CreateUserTest extends TestCase
             'role' => 'admin',
             'name' => 'Integration User',
         ]);
+        $storedPin = (string) DB::table('users')
+            ->where('email', 'integration@example.com')
+            ->value('pin');
+
+        $this->assertNotSame('1234', $storedPin);
+        $this->assertTrue(Hash::check('1234', $storedPin));
     }
 
     public function test_post_users_returns_401_without_token(): void
