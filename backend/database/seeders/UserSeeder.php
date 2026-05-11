@@ -15,7 +15,7 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         $superadminRestaurant = EloquentRestaurant::query()
-            ->where('email', (string) config('superadmin.restaurant_email'))
+            ->where('uuid', (string) config('superadmin.restaurant_uuid'))
             ->firstOrFail();
 
         EloquentUser::query()->firstOrCreate(

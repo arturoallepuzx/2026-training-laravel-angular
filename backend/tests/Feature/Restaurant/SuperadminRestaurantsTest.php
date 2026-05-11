@@ -13,7 +13,6 @@ use App\Shared\Domain\ValueObject\Uuid;
 use App\User\Infrastructure\Persistence\Models\EloquentUser;
 use Firebase\JWT\JWT;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class SuperadminRestaurantsTest extends TestCase
@@ -132,11 +131,11 @@ class SuperadminRestaurantsTest extends TestCase
     private function seedSuperadminRestaurant(): EloquentRestaurant
     {
         return EloquentRestaurant::query()->create([
-            'uuid' => (string) Str::uuid(),
+            'uuid' => (string) config('superadmin.restaurant_uuid'),
             'name' => 'Superadmin',
             'legal_name' => 'Superadmin',
             'tax_id' => 'SUPERADMIN',
-            'email' => (string) config('superadmin.restaurant_email'),
+            'email' => 'system@yurest.local',
             'password' => null,
         ]);
     }

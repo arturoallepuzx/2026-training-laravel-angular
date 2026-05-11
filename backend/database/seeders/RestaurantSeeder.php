@@ -4,19 +4,18 @@ namespace Database\Seeders;
 
 use App\Restaurant\Infrastructure\Persistence\Models\EloquentRestaurant;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class RestaurantSeeder extends Seeder
 {
     public function run(): void
     {
         EloquentRestaurant::query()->firstOrCreate(
-            ['email' => (string) config('superadmin.restaurant_email')],
+            ['uuid' => (string) config('superadmin.restaurant_uuid')],
             [
-                'uuid' => (string) Str::uuid(),
                 'name' => 'Superadmin',
                 'legal_name' => 'Superadmin',
                 'tax_id' => 'SUPERADMIN',
+                'email' => 'system@yurest.local',
                 'password' => null,
             ]
         );
