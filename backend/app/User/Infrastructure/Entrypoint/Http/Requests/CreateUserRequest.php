@@ -28,7 +28,7 @@ class CreateUserRequest extends FormRequest
             'restaurant_id' => ['required', 'uuid'],
             'role' => ['required', 'string', Rule::in(UserRole::allowed())],
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'email' => ['required', 'string', 'email', 'max:255'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'pin' => ['nullable', 'string', 'digits:4'],
             'image_src' => ['nullable', 'string', 'max:2048'],
