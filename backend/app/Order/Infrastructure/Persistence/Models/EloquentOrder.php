@@ -26,6 +26,8 @@ class EloquentOrder extends Model
         'diners',
         'opened_at',
         'closed_at',
+        'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

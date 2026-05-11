@@ -23,6 +23,8 @@ class EloquentRestaurant extends Model
         'tax_id',
         'email',
         'password',
+        'created_at',
+        'updated_at',
     ];
 
     protected $hidden = [

@@ -18,6 +18,8 @@ class EloquentRefreshToken extends Model
         'expires_at',
         'revoked_at',
         'replaced_by_id',
+        'created_at',
+        'updated_at',
     ];
 
     protected function casts(): array

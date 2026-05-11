@@ -24,6 +24,8 @@ class EloquentSale extends Model
         'ticket_number',
         'value_date',
         'total',
+        'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

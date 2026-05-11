@@ -21,6 +21,8 @@ class EloquentFamily extends Model
         'restaurant_id',
         'name',
         'active',
+        'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

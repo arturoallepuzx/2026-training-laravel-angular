@@ -20,6 +20,8 @@ class EloquentZone extends Model
         'uuid',
         'restaurant_id',
         'name',
+        'created_at',
+        'updated_at',
     ];
 
     protected static function newFactory(): Factory

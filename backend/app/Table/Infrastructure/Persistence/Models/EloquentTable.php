@@ -21,6 +21,8 @@ class EloquentTable extends Model
         'restaurant_id',
         'zone_id',
         'name',
+        'created_at',
+        'updated_at',
     ];
 
     protected static function newFactory(): Factory

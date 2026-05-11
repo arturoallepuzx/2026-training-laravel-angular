@@ -25,6 +25,8 @@ class EloquentUser extends Model
         'email',
         'password',
         'pin',
+        'created_at',
+        'updated_at',
     ];
 
     protected $hidden = [
