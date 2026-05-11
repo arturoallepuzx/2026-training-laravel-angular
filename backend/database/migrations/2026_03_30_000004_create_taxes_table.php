@@ -20,7 +20,8 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->unique(['restaurant_id', 'name', 'deleted_at']);
+            $table->boolean('is_active')->virtualAs('IF(deleted_at IS NULL, 1, NULL)');
+            $table->unique(['restaurant_id', 'name', 'is_active']);
         });
     }
 
