@@ -5,6 +5,11 @@ use App\Family\Infrastructure\Entrypoint\Http\GetAllController as FamilyGetAllCo
 use App\Family\Infrastructure\Entrypoint\Http\GetByIdController as FamilyGetByIdController;
 use App\Family\Infrastructure\Entrypoint\Http\PostController as FamilyPostController;
 use App\Family\Infrastructure\Entrypoint\Http\PutController as FamilyPutController;
+use App\Product\Infrastructure\Entrypoint\Http\DeleteController as ProductDeleteController;
+use App\Product\Infrastructure\Entrypoint\Http\GetAllController as ProductGetAllController;
+use App\Product\Infrastructure\Entrypoint\Http\GetByIdController as ProductGetByIdController;
+use App\Product\Infrastructure\Entrypoint\Http\PostController as ProductPostController;
+use App\Product\Infrastructure\Entrypoint\Http\PutController as ProductPutController;
 use App\Restaurant\Infrastructure\Entrypoint\Http\DeleteController as RestaurantDeleteController;
 use App\Restaurant\Infrastructure\Entrypoint\Http\GetAllController as RestaurantGetAllController;
 use App\Restaurant\Infrastructure\Entrypoint\Http\GetByIdController as RestaurantGetByIdController;
@@ -123,5 +128,18 @@ Route::prefix('/restaurants/{restaurantId}')
                 Route::put('/{taxId}', TaxPutController::class)->whereUuid('taxId')->middleware('auth.role:admin');
 
                 Route::delete('/{taxId}', TaxDeleteController::class)->whereUuid('taxId')->middleware('auth.role:admin');
+            });
+
+        Route::prefix('/products')
+            ->middleware(['auth.access_token', 'auth.restaurant'])
+            ->group(function () {
+                Route::get('/', ProductGetAllController::class);
+                Route::get('/{productId}', ProductGetByIdController::class)->whereUuid('productId');
+
+                Route::post('/', ProductPostController::class)->middleware('auth.role:admin');
+
+                Route::put('/{productId}', ProductPutController::class)->whereUuid('productId')->middleware('auth.role:admin');
+
+                Route::delete('/{productId}', ProductDeleteController::class)->whereUuid('productId')->middleware('auth.role:admin');
             });
     });
