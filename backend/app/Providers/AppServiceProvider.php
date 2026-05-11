@@ -16,6 +16,8 @@ use App\Auth\Infrastructure\Services\JwtUserAuthenticationIssuer;
 use App\Auth\Infrastructure\Services\JwtUserAuthenticationRefresher;
 use App\Auth\Infrastructure\Services\JwtUserAuthenticationRevoker;
 use App\Auth\Infrastructure\Services\RandomRefreshTokenIssuer;
+use App\Family\Domain\Interfaces\FamilyRepositoryInterface;
+use App\Family\Infrastructure\Persistence\Repositories\EloquentFamilyRepository;
 use App\Restaurant\Domain\Interfaces\RestaurantRepositoryInterface;
 use App\Restaurant\Infrastructure\Persistence\Repositories\EloquentRestaurantRepository;
 use App\Shared\Domain\Interfaces\TransactionRunnerInterface;
@@ -51,6 +53,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(UserRepositoryInterface::class, EloquentUserRepository::class);
         $this->app->bind(PasswordHasherInterface::class, LaravelPasswordHasher::class);
         $this->app->bind(PinHasherInterface::class, LaravelPinHasher::class);
+        $this->app->bind(FamilyRepositoryInterface::class, EloquentFamilyRepository::class);
         $this->app->bind(TaxRepositoryInterface::class, EloquentTaxRepository::class);
         $this->app->bind(RestaurantRepositoryInterface::class, EloquentRestaurantRepository::class);
         $this->app->bind(RefreshTokenIssuerInterface::class, RandomRefreshTokenIssuer::class);

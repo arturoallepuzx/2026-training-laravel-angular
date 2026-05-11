@@ -19,6 +19,9 @@ return new class extends Migration
             $table->boolean('active')->default(true);
             $table->timestamps();
             $table->softDeletes();
+
+            $table->boolean('is_active')->virtualAs('CASE WHEN deleted_at IS NULL THEN 1 ELSE NULL END');
+            $table->unique(['restaurant_id', 'name', 'is_active']);
         });
     }
 

@@ -1,5 +1,10 @@
 <?php
 
+use App\Family\Infrastructure\Entrypoint\Http\DeleteController as FamilyDeleteController;
+use App\Family\Infrastructure\Entrypoint\Http\GetAllController as FamilyGetAllController;
+use App\Family\Infrastructure\Entrypoint\Http\GetByIdController as FamilyGetByIdController;
+use App\Family\Infrastructure\Entrypoint\Http\PostController as FamilyPostController;
+use App\Family\Infrastructure\Entrypoint\Http\PutController as FamilyPutController;
 use App\Restaurant\Infrastructure\Entrypoint\Http\DeleteController as RestaurantDeleteController;
 use App\Restaurant\Infrastructure\Entrypoint\Http\GetAllController as RestaurantGetAllController;
 use App\Restaurant\Infrastructure\Entrypoint\Http\GetByIdController as RestaurantGetByIdController;
@@ -93,6 +98,19 @@ Route::prefix('/restaurants/{restaurantId}')
         Route::post('/users/{userId}/force-logout', UserForceLogoutPostController::class)
             ->whereUuid('userId')
             ->middleware(['auth.access_token', 'auth.restaurant', 'auth.role:admin', 'throttle:30,1']);
+
+        Route::prefix('/families')
+            ->middleware(['auth.access_token', 'auth.restaurant'])
+            ->group(function () {
+                Route::get('/', FamilyGetAllController::class);
+                Route::get('/{familyId}', FamilyGetByIdController::class)->whereUuid('familyId');
+
+                Route::post('/', FamilyPostController::class)->middleware('auth.role:admin');
+
+                Route::put('/{familyId}', FamilyPutController::class)->whereUuid('familyId')->middleware('auth.role:admin');
+
+                Route::delete('/{familyId}', FamilyDeleteController::class)->whereUuid('familyId')->middleware('auth.role:admin');
+            });
 
         Route::prefix('/taxes')
             ->middleware(['auth.access_token', 'auth.restaurant'])
