@@ -253,6 +253,34 @@ class ProductCrudTest extends TestCase
         $response->assertStatus(409);
     }
 
+    public function test_post_allows_reusing_name_after_product_is_soft_deleted(): void
+    {
+        $restaurant = EloquentRestaurant::factory()->create();
+        $token = $this->issueAdminToken(Uuid::create($restaurant->uuid));
+        [$family, $tax] = $this->createFamilyAndTaxFor($restaurant);
+        $deletedProduct = EloquentProduct::factory()->create([
+            'restaurant_id' => $restaurant->id,
+            'family_id' => $family->id,
+            'tax_id' => $tax->id,
+            'name' => 'Cafe solo',
+        ]);
+        $deletedProduct->delete();
+
+        $response = $this->postJson(
+            "/api/restaurants/{$restaurant->uuid}/products",
+            [
+                'family_id' => $family->uuid,
+                'tax_id' => $tax->uuid,
+                'name' => 'Cafe solo',
+                'price' => 150,
+                'stock' => 20,
+            ],
+            ['Authorization' => 'Bearer '.$token],
+        );
+
+        $response->assertStatus(201);
+    }
+
     public function test_put_updates_product_when_authenticated_as_admin(): void
     {
         $restaurant = EloquentRestaurant::factory()->create();
