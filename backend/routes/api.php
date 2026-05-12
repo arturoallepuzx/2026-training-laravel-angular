@@ -35,6 +35,11 @@ use App\User\Infrastructure\Entrypoint\Http\PostController as UserPostController
 use App\User\Infrastructure\Entrypoint\Http\PutController as UserPutController;
 use App\User\Infrastructure\Entrypoint\Http\RefreshPostController as UserRefreshPostController;
 use App\User\Infrastructure\Entrypoint\Http\SuperadminPostController as UserSuperadminPostController;
+use App\Zone\Infrastructure\Entrypoint\Http\DeleteController as ZoneDeleteController;
+use App\Zone\Infrastructure\Entrypoint\Http\GetAllController as ZoneGetAllController;
+use App\Zone\Infrastructure\Entrypoint\Http\GetByIdController as ZoneGetByIdController;
+use App\Zone\Infrastructure\Entrypoint\Http\PostController as ZonePostController;
+use App\Zone\Infrastructure\Entrypoint\Http\PutController as ZonePutController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('/superadmin')
@@ -128,6 +133,19 @@ Route::prefix('/restaurants/{restaurantId}')
                 Route::put('/{taxId}', TaxPutController::class)->whereUuid('taxId')->middleware('auth.role:admin');
 
                 Route::delete('/{taxId}', TaxDeleteController::class)->whereUuid('taxId')->middleware('auth.role:admin');
+            });
+
+        Route::prefix('/zones')
+            ->middleware(['auth.access_token', 'auth.restaurant'])
+            ->group(function () {
+                Route::get('/', ZoneGetAllController::class);
+                Route::get('/{zoneId}', ZoneGetByIdController::class)->whereUuid('zoneId');
+
+                Route::post('/', ZonePostController::class)->middleware('auth.role:admin');
+
+                Route::put('/{zoneId}', ZonePutController::class)->whereUuid('zoneId')->middleware('auth.role:admin');
+
+                Route::delete('/{zoneId}', ZoneDeleteController::class)->whereUuid('zoneId')->middleware('auth.role:admin');
             });
 
         Route::prefix('/products')
