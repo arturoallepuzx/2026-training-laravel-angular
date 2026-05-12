@@ -26,7 +26,7 @@ return new class extends Migration
             $table->softDeletes();
 
             $table->boolean('is_active')->virtualAs('CASE WHEN deleted_at IS NULL THEN 1 ELSE NULL END');
-            $table->unique(['restaurant_id', 'name', 'is_active']);
+            $table->unique(['restaurant_id', 'name', 'is_active'], 'products_restaurant_name_active_unique');
         });
     }
 

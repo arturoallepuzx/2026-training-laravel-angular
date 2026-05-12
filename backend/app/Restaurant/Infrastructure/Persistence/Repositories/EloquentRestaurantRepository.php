@@ -10,14 +10,16 @@ use App\Restaurant\Domain\Interfaces\RestaurantRepositoryInterface;
 use App\Restaurant\Infrastructure\Persistence\Models\EloquentRestaurant;
 use App\Shared\Domain\ValueObject\Email;
 use App\Shared\Domain\ValueObject\Uuid;
+use App\Shared\Infrastructure\Persistence\MysqlUniqueConstraintViolationDetector;
 use Illuminate\Database\QueryException;
 
 class EloquentRestaurantRepository implements RestaurantRepositoryInterface
 {
-    private const SQLSTATE_INTEGRITY_CONSTRAINT_VIOLATION = '23000';
+    private const UNIQUE_RESTAURANT_EMAIL_CONSTRAINT = 'restaurants_email_unique';
 
     public function __construct(
         private EloquentRestaurant $model,
+        private MysqlUniqueConstraintViolationDetector $uniqueConstraintViolationDetector,
     ) {}
 
     public function create(Restaurant $restaurant): void
@@ -34,7 +36,7 @@ class EloquentRestaurantRepository implements RestaurantRepositoryInterface
                 'updated_at' => $restaurant->updatedAt()->value(),
             ]);
         } catch (QueryException $e) {
-            if ($e->getCode() === self::SQLSTATE_INTEGRITY_CONSTRAINT_VIOLATION) {
+            if ($this->uniqueConstraintViolationDetector->matches($e, self::UNIQUE_RESTAURANT_EMAIL_CONSTRAINT)) {
                 throw RestaurantEmailAlreadyExistsException::forEmail($restaurant->email()->value());
             }
 
@@ -55,7 +57,7 @@ class EloquentRestaurantRepository implements RestaurantRepositoryInterface
                     'updated_at' => $restaurant->updatedAt()->value(),
                 ]);
         } catch (QueryException $e) {
-            if ($e->getCode() === self::SQLSTATE_INTEGRITY_CONSTRAINT_VIOLATION) {
+            if ($this->uniqueConstraintViolationDetector->matches($e, self::UNIQUE_RESTAURANT_EMAIL_CONSTRAINT)) {
                 throw RestaurantEmailAlreadyExistsException::forEmail($restaurant->email()->value());
             }
 

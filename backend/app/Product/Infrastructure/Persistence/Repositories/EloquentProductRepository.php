@@ -6,16 +6,21 @@ namespace App\Product\Infrastructure\Persistence\Repositories;
 
 use App\Product\Domain\Entity\Product;
 use App\Product\Domain\Exception\ProductFamilyNotFoundException;
+use App\Product\Domain\Exception\ProductNameAlreadyExistsException;
 use App\Product\Domain\Exception\ProductTaxNotFoundException;
 use App\Product\Domain\Interfaces\ProductRepositoryInterface;
 use App\Product\Domain\ValueObject\ProductName;
 use App\Product\Infrastructure\Persistence\Models\EloquentProduct;
 use App\Shared\Domain\ValueObject\Uuid;
+use App\Shared\Infrastructure\Persistence\MysqlUniqueConstraintViolationDetector;
 use App\Shared\Infrastructure\Persistence\RestaurantIdResolverInterface;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\QueryException;
 
 class EloquentProductRepository implements ProductRepositoryInterface
 {
+    private const UNIQUE_PRODUCT_NAME_CONSTRAINT = 'products_restaurant_name_active_unique';
+
     /** @var array<string, int|null> */
     private array $familyInternalIds = [];
 
@@ -25,6 +30,7 @@ class EloquentProductRepository implements ProductRepositoryInterface
     public function __construct(
         private EloquentProduct $model,
         private RestaurantIdResolverInterface $restaurantIdResolver,
+        private MysqlUniqueConstraintViolationDetector $uniqueConstraintViolationDetector,
     ) {}
 
     public function create(Product $product): void
@@ -40,19 +46,27 @@ class EloquentProductRepository implements ProductRepositoryInterface
             throw ProductTaxNotFoundException::forId($product->taxId());
         }
 
-        $this->model->newQuery()->create([
-            'uuid' => $product->id()->value(),
-            'restaurant_id' => $this->restaurantIdResolver->toInternalId($product->restaurantId()),
-            'family_id' => $familyInternalId,
-            'tax_id' => $taxInternalId,
-            'image_src' => $product->imageSrc()?->value(),
-            'name' => $product->name()->value(),
-            'price' => $product->price()->value(),
-            'stock' => $product->stock()->value(),
-            'active' => $product->active(),
-            'created_at' => $product->createdAt()->value(),
-            'updated_at' => $product->updatedAt()->value(),
-        ]);
+        try {
+            $this->model->newQuery()->create([
+                'uuid' => $product->id()->value(),
+                'restaurant_id' => $this->restaurantIdResolver->toInternalId($product->restaurantId()),
+                'family_id' => $familyInternalId,
+                'tax_id' => $taxInternalId,
+                'image_src' => $product->imageSrc()?->value(),
+                'name' => $product->name()->value(),
+                'price' => $product->price()->value(),
+                'stock' => $product->stock()->value(),
+                'active' => $product->active(),
+                'created_at' => $product->createdAt()->value(),
+                'updated_at' => $product->updatedAt()->value(),
+            ]);
+        } catch (QueryException $e) {
+            if ($this->uniqueConstraintViolationDetector->matches($e, self::UNIQUE_PRODUCT_NAME_CONSTRAINT)) {
+                throw ProductNameAlreadyExistsException::forName($product->name()->value());
+            }
+
+            throw $e;
+        }
     }
 
     public function update(Product $product): void
@@ -68,19 +82,27 @@ class EloquentProductRepository implements ProductRepositoryInterface
             throw ProductTaxNotFoundException::forId($product->taxId());
         }
 
-        $this->model->newQuery()
-            ->where('uuid', $product->id()->value())
-            ->where('restaurant_id', $this->restaurantIdResolver->toInternalId($product->restaurantId()))
-            ->update([
-                'family_id' => $familyInternalId,
-                'tax_id' => $taxInternalId,
-                'image_src' => $product->imageSrc()?->value(),
-                'name' => $product->name()->value(),
-                'price' => $product->price()->value(),
-                'stock' => $product->stock()->value(),
-                'active' => $product->active(),
-                'updated_at' => $product->updatedAt()->value(),
-            ]);
+        try {
+            $this->model->newQuery()
+                ->where('uuid', $product->id()->value())
+                ->where('restaurant_id', $this->restaurantIdResolver->toInternalId($product->restaurantId()))
+                ->update([
+                    'family_id' => $familyInternalId,
+                    'tax_id' => $taxInternalId,
+                    'image_src' => $product->imageSrc()?->value(),
+                    'name' => $product->name()->value(),
+                    'price' => $product->price()->value(),
+                    'stock' => $product->stock()->value(),
+                    'active' => $product->active(),
+                    'updated_at' => $product->updatedAt()->value(),
+                ]);
+        } catch (QueryException $e) {
+            if ($this->uniqueConstraintViolationDetector->matches($e, self::UNIQUE_PRODUCT_NAME_CONSTRAINT)) {
+                throw ProductNameAlreadyExistsException::forName($product->name()->value());
+            }
+
+            throw $e;
+        }
     }
 
     public function findById(Uuid $id, Uuid $restaurantId): ?Product

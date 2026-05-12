@@ -5,41 +5,63 @@ declare(strict_types=1);
 namespace App\Family\Infrastructure\Persistence\Repositories;
 
 use App\Family\Domain\Entity\Family;
+use App\Family\Domain\Exception\FamilyNameAlreadyExistsException;
 use App\Family\Domain\Interfaces\FamilyRepositoryInterface;
 use App\Family\Domain\ValueObject\FamilyName;
 use App\Family\Infrastructure\Persistence\Models\EloquentFamily;
 use App\Shared\Domain\ValueObject\Uuid;
+use App\Shared\Infrastructure\Persistence\MysqlUniqueConstraintViolationDetector;
 use App\Shared\Infrastructure\Persistence\RestaurantIdResolverInterface;
+use Illuminate\Database\QueryException;
 
 class EloquentFamilyRepository implements FamilyRepositoryInterface
 {
+    private const UNIQUE_FAMILY_NAME_CONSTRAINT = 'families_restaurant_name_active_unique';
+
     public function __construct(
         private EloquentFamily $model,
         private RestaurantIdResolverInterface $restaurantIdResolver,
+        private MysqlUniqueConstraintViolationDetector $uniqueConstraintViolationDetector,
     ) {}
 
     public function create(Family $family): void
     {
-        $this->model->newQuery()->create([
-            'uuid' => $family->id()->value(),
-            'restaurant_id' => $this->restaurantIdResolver->toInternalId($family->restaurantId()),
-            'name' => $family->name()->value(),
-            'active' => $family->active(),
-            'created_at' => $family->createdAt()->value(),
-            'updated_at' => $family->updatedAt()->value(),
-        ]);
+        try {
+            $this->model->newQuery()->create([
+                'uuid' => $family->id()->value(),
+                'restaurant_id' => $this->restaurantIdResolver->toInternalId($family->restaurantId()),
+                'name' => $family->name()->value(),
+                'active' => $family->active(),
+                'created_at' => $family->createdAt()->value(),
+                'updated_at' => $family->updatedAt()->value(),
+            ]);
+        } catch (QueryException $e) {
+            if ($this->uniqueConstraintViolationDetector->matches($e, self::UNIQUE_FAMILY_NAME_CONSTRAINT)) {
+                throw FamilyNameAlreadyExistsException::forName($family->name()->value());
+            }
+
+            throw $e;
+        }
     }
 
     public function update(Family $family): void
     {
-        $this->model->newQuery()
-            ->where('uuid', $family->id()->value())
-            ->where('restaurant_id', $this->restaurantIdResolver->toInternalId($family->restaurantId()))
-            ->update([
-                'name' => $family->name()->value(),
-                'active' => $family->active(),
-                'updated_at' => $family->updatedAt()->value(),
-            ]);
+        try {
+            $this->model->newQuery()
+                ->where('uuid', $family->id()->value())
+                ->where('restaurant_id', $this->restaurantIdResolver->toInternalId($family->restaurantId()))
+                ->update([
+                    'name' => $family->name()->value(),
+                    'active' => $family->active(),
+                    'updated_at' => $family->updatedAt()->value(),
+                ]);
+        } catch (QueryException $e) {
+            if ($this->uniqueConstraintViolationDetector->matches($e, self::UNIQUE_FAMILY_NAME_CONSTRAINT)) {
+                throw FamilyNameAlreadyExistsException::forName($family->name()->value());
+            }
+
+            throw $e;
+        }
     }
 
     public function findById(Uuid $id, Uuid $restaurantId): ?Family

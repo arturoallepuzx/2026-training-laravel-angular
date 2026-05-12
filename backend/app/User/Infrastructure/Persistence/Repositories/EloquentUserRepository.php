@@ -6,6 +6,7 @@ namespace App\User\Infrastructure\Persistence\Repositories;
 
 use App\Shared\Domain\ValueObject\Email;
 use App\Shared\Domain\ValueObject\Uuid;
+use App\Shared\Infrastructure\Persistence\MysqlUniqueConstraintViolationDetector;
 use App\Shared\Infrastructure\Persistence\RestaurantIdResolverInterface;
 use App\User\Domain\Entity\User;
 use App\User\Domain\Exception\UserEmailAlreadyExistsException;
@@ -15,11 +16,12 @@ use Illuminate\Database\QueryException;
 
 class EloquentUserRepository implements UserRepositoryInterface
 {
-    private const SQLSTATE_INTEGRITY_CONSTRAINT_VIOLATION = '23000';
+    private const UNIQUE_USER_EMAIL_CONSTRAINT = 'users_email_unique';
 
     public function __construct(
         private EloquentUser $model,
         private RestaurantIdResolverInterface $restaurantIdResolver,
+        private MysqlUniqueConstraintViolationDetector $uniqueConstraintViolationDetector,
     ) {}
 
     public function create(User $user): void
@@ -38,7 +40,7 @@ class EloquentUserRepository implements UserRepositoryInterface
                 'updated_at' => $user->updatedAt()->value(),
             ]);
         } catch (QueryException $e) {
-            if ($e->getCode() === self::SQLSTATE_INTEGRITY_CONSTRAINT_VIOLATION) {
+            if ($this->uniqueConstraintViolationDetector->matches($e, self::UNIQUE_USER_EMAIL_CONSTRAINT)) {
                 throw UserEmailAlreadyExistsException::forEmail($user->email()->value());
             }
 
@@ -62,7 +64,7 @@ class EloquentUserRepository implements UserRepositoryInterface
                     'updated_at' => $user->updatedAt()->value(),
                 ]);
         } catch (QueryException $e) {
-            if ($e->getCode() === self::SQLSTATE_INTEGRITY_CONSTRAINT_VIOLATION) {
+            if ($this->uniqueConstraintViolationDetector->matches($e, self::UNIQUE_USER_EMAIL_CONSTRAINT)) {
                 throw UserEmailAlreadyExistsException::forEmail($user->email()->value());
             }
 

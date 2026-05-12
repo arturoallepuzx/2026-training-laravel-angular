@@ -5,41 +5,63 @@ declare(strict_types=1);
 namespace App\Tax\Infrastructure\Persistence\Repositories;
 
 use App\Shared\Domain\ValueObject\Uuid;
+use App\Shared\Infrastructure\Persistence\MysqlUniqueConstraintViolationDetector;
 use App\Shared\Infrastructure\Persistence\RestaurantIdResolverInterface;
 use App\Tax\Domain\Entity\Tax;
+use App\Tax\Domain\Exception\TaxNameAlreadyExistsException;
 use App\Tax\Domain\Interfaces\TaxRepositoryInterface;
 use App\Tax\Domain\ValueObject\TaxName;
 use App\Tax\Infrastructure\Persistence\Models\EloquentTax;
+use Illuminate\Database\QueryException;
 
 class EloquentTaxRepository implements TaxRepositoryInterface
 {
+    private const UNIQUE_TAX_NAME_CONSTRAINT = 'taxes_restaurant_name_active_unique';
+
     public function __construct(
         private EloquentTax $model,
         private RestaurantIdResolverInterface $restaurantIdResolver,
+        private MysqlUniqueConstraintViolationDetector $uniqueConstraintViolationDetector,
     ) {}
 
     public function create(Tax $tax): void
     {
-        $this->model->newQuery()->create([
-            'uuid' => $tax->id()->value(),
-            'restaurant_id' => $this->restaurantIdResolver->toInternalId($tax->restaurantId()),
-            'name' => $tax->name()->value(),
-            'percentage' => $tax->percentage()->value(),
-            'created_at' => $tax->createdAt()->value(),
-            'updated_at' => $tax->updatedAt()->value(),
-        ]);
+        try {
+            $this->model->newQuery()->create([
+                'uuid' => $tax->id()->value(),
+                'restaurant_id' => $this->restaurantIdResolver->toInternalId($tax->restaurantId()),
+                'name' => $tax->name()->value(),
+                'percentage' => $tax->percentage()->value(),
+                'created_at' => $tax->createdAt()->value(),
+                'updated_at' => $tax->updatedAt()->value(),
+            ]);
+        } catch (QueryException $e) {
+            if ($this->uniqueConstraintViolationDetector->matches($e, self::UNIQUE_TAX_NAME_CONSTRAINT)) {
+                throw TaxNameAlreadyExistsException::forName($tax->name()->value());
+            }
+
+            throw $e;
+        }
     }
 
     public function update(Tax $tax): void
     {
-        $this->model->newQuery()
-            ->where('uuid', $tax->id()->value())
-            ->where('restaurant_id', $this->restaurantIdResolver->toInternalId($tax->restaurantId()))
-            ->update([
-                'name' => $tax->name()->value(),
-                'percentage' => $tax->percentage()->value(),
-                'updated_at' => $tax->updatedAt()->value(),
-            ]);
+        try {
+            $this->model->newQuery()
+                ->where('uuid', $tax->id()->value())
+                ->where('restaurant_id', $this->restaurantIdResolver->toInternalId($tax->restaurantId()))
+                ->update([
+                    'name' => $tax->name()->value(),
+                    'percentage' => $tax->percentage()->value(),
+                    'updated_at' => $tax->updatedAt()->value(),
+                ]);
+        } catch (QueryException $e) {
+            if ($this->uniqueConstraintViolationDetector->matches($e, self::UNIQUE_TAX_NAME_CONSTRAINT)) {
+                throw TaxNameAlreadyExistsException::forName($tax->name()->value());
+            }
+
+            throw $e;
+        }
     }
 
     public function findById(Uuid $id, Uuid $restaurantId): ?Tax

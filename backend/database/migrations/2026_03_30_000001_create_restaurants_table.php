@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('legal_name');
             $table->string('tax_id');
-            $table->string('email')->unique();
+            $table->string('email')->unique('restaurants_email_unique');
             $table->string('password')->nullable();
             $table->timestamps();
             $table->softDeletes();

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('role')->default('operator');
             $table->string('image_src')->nullable();
             $table->string('name');
-            $table->string('email')->unique();
+            $table->string('email')->unique('users_email_unique');
             $table->string('password');
             $table->string('pin')->nullable();
             $table->timestamps();
