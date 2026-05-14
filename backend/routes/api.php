@@ -15,6 +15,11 @@ use App\Restaurant\Infrastructure\Entrypoint\Http\GetAllController as Restaurant
 use App\Restaurant\Infrastructure\Entrypoint\Http\GetByIdController as RestaurantGetByIdController;
 use App\Restaurant\Infrastructure\Entrypoint\Http\PostController as RestaurantPostController;
 use App\Restaurant\Infrastructure\Entrypoint\Http\PutController as RestaurantPutController;
+use App\Table\Infrastructure\Entrypoint\Http\DeleteController as TableDeleteController;
+use App\Table\Infrastructure\Entrypoint\Http\GetAllController as TableGetAllController;
+use App\Table\Infrastructure\Entrypoint\Http\GetByIdController as TableGetByIdController;
+use App\Table\Infrastructure\Entrypoint\Http\PostController as TablePostController;
+use App\Table\Infrastructure\Entrypoint\Http\PutController as TablePutController;
 use App\Tax\Infrastructure\Entrypoint\Http\DeleteController as TaxDeleteController;
 use App\Tax\Infrastructure\Entrypoint\Http\GetAllController as TaxGetAllController;
 use App\Tax\Infrastructure\Entrypoint\Http\GetByIdController as TaxGetByIdController;
@@ -159,5 +164,18 @@ Route::prefix('/restaurants/{restaurantId}')
                 Route::put('/{productId}', ProductPutController::class)->whereUuid('productId')->middleware('auth.role:admin');
 
                 Route::delete('/{productId}', ProductDeleteController::class)->whereUuid('productId')->middleware('auth.role:admin');
+            });
+
+        Route::prefix('/tables')
+            ->middleware(['auth.access_token', 'auth.restaurant'])
+            ->group(function () {
+                Route::get('/', TableGetAllController::class);
+                Route::get('/{tableId}', TableGetByIdController::class)->whereUuid('tableId');
+
+                Route::post('/', TablePostController::class)->middleware('auth.role:admin');
+
+                Route::put('/{tableId}', TablePutController::class)->whereUuid('tableId')->middleware('auth.role:admin');
+
+                Route::delete('/{tableId}', TableDeleteController::class)->whereUuid('tableId')->middleware('auth.role:admin');
             });
     });

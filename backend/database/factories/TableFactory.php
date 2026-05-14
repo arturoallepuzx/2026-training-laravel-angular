@@ -14,7 +14,7 @@ class TableFactory extends Factory
     {
         return [
             'uuid' => (string) Str::uuid(),
-            'name' => 'Mesa '.fake()->numberBetween(1, 100),
+            'name' => 'Mesa '.fake()->unique()->numberBetween(1, 1000),
         ];
     }
 }
