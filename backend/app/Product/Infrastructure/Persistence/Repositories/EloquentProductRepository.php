@@ -150,11 +150,17 @@ class EloquentProductRepository implements ProductRepositoryInterface
     /** @return Builder<EloquentProduct> */
     private function productQuery(Uuid $restaurantId): Builder
     {
+        $internalRestaurantId = $this->restaurantIdResolver->toInternalId($restaurantId);
+
         return $this->model->newQuery()
             ->select('products.*', 'families.uuid as family_uuid', 'taxes.uuid as tax_uuid')
             ->join('families', 'families.id', '=', 'products.family_id')
             ->join('taxes', 'taxes.id', '=', 'products.tax_id')
-            ->where('products.restaurant_id', $this->restaurantIdResolver->toInternalId($restaurantId));
+            ->where('products.restaurant_id', $internalRestaurantId)
+            ->where('families.restaurant_id', $internalRestaurantId)
+            ->where('taxes.restaurant_id', $internalRestaurantId)
+            ->whereNull('families.deleted_at')
+            ->whereNull('taxes.deleted_at');
     }
 
     private function familyInternalId(Uuid $familyId, Uuid $restaurantId): ?int
