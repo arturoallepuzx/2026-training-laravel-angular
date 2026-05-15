@@ -301,6 +301,37 @@ class TableCrudTest extends TestCase
         ]);
     }
 
+    public function test_put_persists_case_only_name_change(): void
+    {
+        $restaurant = EloquentRestaurant::factory()->create();
+        $token = $this->issueAdminToken(Uuid::create($restaurant->uuid));
+        $zone = EloquentZone::factory()->create([
+            'restaurant_id' => $restaurant->id,
+            'name' => 'Terraza',
+        ]);
+        $table = EloquentTable::factory()->create([
+            'restaurant_id' => $restaurant->id,
+            'zone_id' => $zone->id,
+            'name' => 'mesa vip',
+        ]);
+
+        $response = $this->putJson(
+            "/api/restaurants/{$restaurant->uuid}/tables/{$table->uuid}",
+            ['name' => 'Mesa VIP'],
+            ['Authorization' => 'Bearer '.$token],
+        );
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'id' => $table->uuid,
+            'name' => 'Mesa VIP',
+        ]);
+        $this->assertDatabaseHas('tables', [
+            'uuid' => $table->uuid,
+            'name' => 'Mesa VIP',
+        ]);
+    }
+
     public function test_put_moves_table_to_another_zone(): void
     {
         $restaurant = EloquentRestaurant::factory()->create();

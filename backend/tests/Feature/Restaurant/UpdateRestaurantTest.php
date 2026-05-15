@@ -65,6 +65,39 @@ class UpdateRestaurantTest extends TestCase
         ]);
     }
 
+    public function test_admin_persists_case_only_name_change(): void
+    {
+        $restaurant = EloquentRestaurant::factory()->create([
+            'name' => 'bistro central',
+        ]);
+        $admin = EloquentUser::factory()->create([
+            'restaurant_id' => $restaurant->id,
+            'role' => 'admin',
+        ]);
+
+        $token = $this->issueToken(
+            userId: Uuid::create($admin->uuid),
+            restaurantId: Uuid::create($restaurant->uuid),
+            role: UserRole::admin(),
+        );
+
+        $response = $this->putJson(
+            "/api/restaurants/{$restaurant->uuid}",
+            ['name' => 'Bistro Central'],
+            ['Authorization' => 'Bearer '.$token],
+        );
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'id' => $restaurant->uuid,
+            'name' => 'Bistro Central',
+        ]);
+        $this->assertDatabaseHas('restaurants', [
+            'uuid' => $restaurant->uuid,
+            'name' => 'Bistro Central',
+        ]);
+    }
+
     public function test_returns_409_when_email_already_taken(): void
     {
         $restaurantA = EloquentRestaurant::factory()->create([

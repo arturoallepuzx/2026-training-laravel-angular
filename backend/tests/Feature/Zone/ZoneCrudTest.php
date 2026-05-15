@@ -184,6 +184,32 @@ class ZoneCrudTest extends TestCase
         ]);
     }
 
+    public function test_put_persists_case_only_name_change(): void
+    {
+        $restaurant = EloquentRestaurant::factory()->create();
+        $token = $this->issueAdminToken(Uuid::create($restaurant->uuid));
+        $zone = EloquentZone::factory()->create([
+            'restaurant_id' => $restaurant->id,
+            'name' => 'terraza',
+        ]);
+
+        $response = $this->putJson(
+            "/api/restaurants/{$restaurant->uuid}/zones/{$zone->uuid}",
+            ['name' => 'Terraza'],
+            ['Authorization' => 'Bearer '.$token],
+        );
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'id' => $zone->uuid,
+            'name' => 'Terraza',
+        ]);
+        $this->assertDatabaseHas('zones', [
+            'uuid' => $zone->uuid,
+            'name' => 'Terraza',
+        ]);
+    }
+
     public function test_put_returns_422_for_invalid_payload(): void
     {
         $restaurant = EloquentRestaurant::factory()->create();

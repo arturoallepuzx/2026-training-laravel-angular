@@ -336,6 +336,35 @@ class ProductCrudTest extends TestCase
         ]);
     }
 
+    public function test_put_persists_case_only_name_change(): void
+    {
+        $restaurant = EloquentRestaurant::factory()->create();
+        $token = $this->issueAdminToken(Uuid::create($restaurant->uuid));
+        [$family, $tax] = $this->createFamilyAndTaxFor($restaurant);
+        $product = EloquentProduct::factory()->create([
+            'restaurant_id' => $restaurant->id,
+            'family_id' => $family->id,
+            'tax_id' => $tax->id,
+            'name' => 'cafe solo',
+        ]);
+
+        $response = $this->putJson(
+            "/api/restaurants/{$restaurant->uuid}/products/{$product->uuid}",
+            ['name' => 'Cafe Solo'],
+            ['Authorization' => 'Bearer '.$token],
+        );
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'id' => $product->uuid,
+            'name' => 'Cafe Solo',
+        ]);
+        $this->assertDatabaseHas('products', [
+            'uuid' => $product->uuid,
+            'name' => 'Cafe Solo',
+        ]);
+    }
+
     public function test_put_returns_409_when_name_already_exists_in_restaurant(): void
     {
         $restaurant = EloquentRestaurant::factory()->create();

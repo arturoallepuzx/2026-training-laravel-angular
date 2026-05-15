@@ -75,5 +75,39 @@ class ProductEntityTest extends TestCase
         $this->assertSame(8, $product->stock()->value());
         $this->assertFalse($product->active());
         $this->assertGreaterThanOrEqual($previousUpdatedAt, $product->updatedAt()->value());
+        $this->assertTrue($product->wasModified());
+    }
+
+    public function test_is_not_modified_after_creation(): void
+    {
+        $product = $this->buildProduct();
+
+        $this->assertFalse($product->wasModified());
+    }
+
+    public function test_same_values_do_not_mark_as_modified(): void
+    {
+        $product = $this->buildProduct();
+
+        $product->updateName(ProductName::create('Cafe solo'));
+        $product->updatePrice(ProductPrice::create(150));
+        $product->updateStock(ProductStock::create(20));
+        $product->updateActive(true);
+        $product->updateImageSrc(ProductImageSrc::create('/images/cafe.png'));
+
+        $this->assertFalse($product->wasModified());
+    }
+
+    private function buildProduct(): Product
+    {
+        return Product::dddCreate(
+            Uuid::generate(),
+            Uuid::generate(),
+            Uuid::generate(),
+            ProductImageSrc::create('/images/cafe.png'),
+            ProductName::create('Cafe solo'),
+            ProductPrice::create(150),
+            ProductStock::create(20),
+        );
     }
 }

@@ -43,5 +43,23 @@ class FamilyEntityTest extends TestCase
         $this->assertSame('Postres', $family->name()->value());
         $this->assertFalse($family->active());
         $this->assertGreaterThanOrEqual($previousUpdatedAt, $family->updatedAt()->value());
+        $this->assertTrue($family->wasModified());
+    }
+
+    public function test_is_not_modified_after_creation(): void
+    {
+        $family = Family::dddCreate(Uuid::generate(), FamilyName::create('Bebidas'));
+
+        $this->assertFalse($family->wasModified());
+    }
+
+    public function test_same_values_do_not_mark_as_modified(): void
+    {
+        $family = Family::dddCreate(Uuid::generate(), FamilyName::create('Bebidas'), true);
+
+        $family->updateName(FamilyName::create('Bebidas'));
+        $family->updateActive(true);
+
+        $this->assertFalse($family->wasModified());
     }
 }

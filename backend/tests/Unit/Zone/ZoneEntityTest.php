@@ -40,5 +40,22 @@ class ZoneEntityTest extends TestCase
 
         $this->assertSame('Salon Principal', $zone->name()->value());
         $this->assertGreaterThanOrEqual($previousUpdatedAt, $zone->updatedAt()->value());
+        $this->assertTrue($zone->wasModified());
+    }
+
+    public function test_is_not_modified_after_creation(): void
+    {
+        $zone = Zone::dddCreate(Uuid::generate(), ZoneName::create('Terraza'));
+
+        $this->assertFalse($zone->wasModified());
+    }
+
+    public function test_same_name_does_not_mark_as_modified(): void
+    {
+        $zone = Zone::dddCreate(Uuid::generate(), ZoneName::create('Terraza'));
+
+        $zone->updateName(ZoneName::create('Terraza'));
+
+        $this->assertFalse($zone->wasModified());
     }
 }

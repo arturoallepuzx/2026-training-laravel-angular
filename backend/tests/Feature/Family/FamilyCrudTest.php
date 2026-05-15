@@ -195,6 +195,33 @@ class FamilyCrudTest extends TestCase
         ]);
     }
 
+    public function test_put_persists_case_only_name_change(): void
+    {
+        $restaurant = EloquentRestaurant::factory()->create();
+        $token = $this->issueAdminToken(Uuid::create($restaurant->uuid));
+        $family = EloquentFamily::factory()->create([
+            'restaurant_id' => $restaurant->id,
+            'name' => 'bebidas',
+            'active' => true,
+        ]);
+
+        $response = $this->putJson(
+            "/api/restaurants/{$restaurant->uuid}/families/{$family->uuid}",
+            ['name' => 'Bebidas'],
+            ['Authorization' => 'Bearer '.$token],
+        );
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'id' => $family->uuid,
+            'name' => 'Bebidas',
+        ]);
+        $this->assertDatabaseHas('families', [
+            'uuid' => $family->uuid,
+            'name' => 'Bebidas',
+        ]);
+    }
+
     public function test_put_returns_409_when_name_already_exists_in_restaurant(): void
     {
         $restaurant = EloquentRestaurant::factory()->create();

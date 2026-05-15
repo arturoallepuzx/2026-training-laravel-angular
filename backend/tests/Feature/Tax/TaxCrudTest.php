@@ -197,6 +197,33 @@ class TaxCrudTest extends TestCase
         ]);
     }
 
+    public function test_put_persists_case_only_name_change(): void
+    {
+        $restaurant = EloquentRestaurant::factory()->create();
+        $token = $this->issueAdminToken(Uuid::create($restaurant->uuid));
+        $tax = EloquentTax::factory()->create([
+            'restaurant_id' => $restaurant->id,
+            'name' => 'iva general',
+            'percentage' => 21,
+        ]);
+
+        $response = $this->putJson(
+            "/api/restaurants/{$restaurant->uuid}/taxes/{$tax->uuid}",
+            ['name' => 'IVA General'],
+            ['Authorization' => 'Bearer '.$token],
+        );
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'id' => $tax->uuid,
+            'name' => 'IVA General',
+        ]);
+        $this->assertDatabaseHas('taxes', [
+            'uuid' => $tax->uuid,
+            'name' => 'IVA General',
+        ]);
+    }
+
     public function test_put_returns_409_when_name_already_exists_in_restaurant(): void
     {
         $restaurant = EloquentRestaurant::factory()->create();

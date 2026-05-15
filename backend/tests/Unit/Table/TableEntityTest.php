@@ -44,6 +44,7 @@ class TableEntityTest extends TestCase
 
         $this->assertSame('Mesa VIP', $table->name()->value());
         $this->assertGreaterThanOrEqual($previousUpdatedAt, $table->updatedAt()->value());
+        $this->assertTrue($table->wasModified());
     }
 
     public function test_updates_zone_id(): void
@@ -61,6 +62,7 @@ class TableEntityTest extends TestCase
 
         $this->assertSame($newZoneId->value(), $table->zoneId()->value());
         $this->assertGreaterThanOrEqual($previousUpdatedAt, $table->updatedAt()->value());
+        $this->assertTrue($table->wasModified());
     }
 
     public function test_name_rejects_empty_string(): void
@@ -73,5 +75,23 @@ class TableEntityTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
         TableName::create(str_repeat('a', 256));
+    }
+
+    public function test_is_not_modified_after_creation(): void
+    {
+        $table = Table::dddCreate(Uuid::generate(), Uuid::generate(), TableName::create('Mesa 1'));
+
+        $this->assertFalse($table->wasModified());
+    }
+
+    public function test_same_values_do_not_mark_as_modified(): void
+    {
+        $zoneId = Uuid::generate();
+        $table = Table::dddCreate(Uuid::generate(), $zoneId, TableName::create('Mesa 1'));
+
+        $table->updateName(TableName::create('Mesa 1'));
+        $table->updateZoneId($zoneId);
+
+        $this->assertFalse($table->wasModified());
     }
 }

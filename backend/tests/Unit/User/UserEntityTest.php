@@ -59,4 +59,46 @@ class UserEntityTest extends TestCase
         $this->assertNull($user->pinHash());
         $this->assertNull($user->imageSrc());
     }
+
+    public function test_is_not_modified_after_creation(): void
+    {
+        $user = $this->buildUser();
+
+        $this->assertFalse($user->wasModified());
+    }
+
+    public function test_updates_name(): void
+    {
+        $user = $this->buildUser();
+
+        $user->updateName(UserName::create('Renamed User'));
+
+        $this->assertSame('Renamed User', $user->name()->value());
+        $this->assertTrue($user->wasModified());
+    }
+
+    public function test_same_values_do_not_mark_as_modified(): void
+    {
+        $user = $this->buildUser();
+
+        $user->updateName(UserName::create('Test User'));
+        $user->updateEmail(Email::create('user@example.com'));
+        $user->updateRole(UserRole::operator());
+        $user->updateImageSrc('avatar.png');
+
+        $this->assertFalse($user->wasModified());
+    }
+
+    private function buildUser(): User
+    {
+        return User::dddCreate(
+            Uuid::generate(),
+            UserRole::operator(),
+            UserName::create('Test User'),
+            Email::create('user@example.com'),
+            PasswordHash::create(self::VALID_HASH),
+            null,
+            'avatar.png',
+        );
+    }
 }

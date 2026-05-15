@@ -67,6 +67,41 @@ class UpdateUserTest extends TestCase
         ]);
     }
 
+    public function test_admin_persists_case_only_name_change(): void
+    {
+        $restaurant = EloquentRestaurant::factory()->create();
+        $admin = EloquentUser::factory()->create([
+            'restaurant_id' => $restaurant->id,
+            'role' => 'admin',
+        ]);
+        $target = EloquentUser::factory()->create([
+            'restaurant_id' => $restaurant->id,
+            'name' => 'old name',
+        ]);
+
+        $token = $this->issueToken(
+            userId: Uuid::create($admin->uuid),
+            restaurantId: Uuid::create($restaurant->uuid),
+            role: UserRole::admin(),
+        );
+
+        $response = $this->putJson(
+            "/api/restaurants/{$restaurant->uuid}/users/{$target->uuid}",
+            ['name' => 'Old Name'],
+            ['Authorization' => 'Bearer '.$token],
+        );
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'id' => $target->uuid,
+            'name' => 'Old Name',
+        ]);
+        $this->assertDatabaseHas('users', [
+            'uuid' => $target->uuid,
+            'name' => 'Old Name',
+        ]);
+    }
+
     public function test_admin_updates_image_src_to_null(): void
     {
         $restaurant = EloquentRestaurant::factory()->create();
