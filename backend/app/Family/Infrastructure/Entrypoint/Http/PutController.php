@@ -16,11 +16,13 @@ class PutController
 
     public function __invoke(UpdateFamilyRequest $request, string $restaurantId, string $familyId): JsonResponse
     {
+        $validated = $request->validated();
+
         $response = ($this->updateFamily)(
             $familyId,
             $restaurantId,
-            $request->validated('name'),
-            $request->validated('active'),
+            $validated['name'] ?? null,
+            $validated['active'] ?? null,
         );
 
         return new JsonResponse($response->toArray());
