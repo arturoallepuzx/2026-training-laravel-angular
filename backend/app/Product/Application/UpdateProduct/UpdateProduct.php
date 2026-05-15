@@ -49,11 +49,11 @@ class UpdateProduct
         if ($familyId !== null) {
             $familyUuid = Uuid::create($familyId);
 
-            if (! $this->productFamilyExistsChecker->check($familyUuid, $restaurantUuid)) {
-                throw ProductFamilyNotFoundException::forId($familyUuid);
-            }
-
             if ($familyUuid->value() !== $product->familyId()->value()) {
+                if (! $this->productFamilyExistsChecker->check($familyUuid, $restaurantUuid)) {
+                    throw ProductFamilyNotFoundException::forId($familyUuid);
+                }
+
                 $product->updateFamilyId($familyUuid);
             }
         }
@@ -61,22 +61,24 @@ class UpdateProduct
         if ($taxId !== null) {
             $taxUuid = Uuid::create($taxId);
 
-            if (! $this->productTaxExistsChecker->check($taxUuid, $restaurantUuid)) {
-                throw ProductTaxNotFoundException::forId($taxUuid);
-            }
-
             if ($taxUuid->value() !== $product->taxId()->value()) {
+                if (! $this->productTaxExistsChecker->check($taxUuid, $restaurantUuid)) {
+                    throw ProductTaxNotFoundException::forId($taxUuid);
+                }
+
                 $product->updateTaxId($taxUuid);
             }
         }
 
         $productName = $name !== null ? ProductName::create($name) : null;
 
-        if ($productName !== null && ! $productName->equals($product->name())) {
-            $existing = $this->productRepository->findByNameAndRestaurantId($productName, $restaurantUuid);
+        if ($productName !== null && $productName->value() !== $product->name()->value()) {
+            if (! $productName->equals($product->name())) {
+                $existing = $this->productRepository->findByNameAndRestaurantId($productName, $restaurantUuid);
 
-            if ($existing !== null && $existing->id()->value() !== $product->id()->value()) {
-                throw ProductNameAlreadyExistsException::forName($productName->value());
+                if ($existing !== null && $existing->id()->value() !== $product->id()->value()) {
+                    throw ProductNameAlreadyExistsException::forName($productName->value());
+                }
             }
 
             $product->updateName($productName);
@@ -98,7 +100,9 @@ class UpdateProduct
             $product->updateActive($active);
         }
 
-        $this->productRepository->update($product);
+        if ($product->wasModified()) {
+            $this->productRepository->update($product);
+        }
 
         return UpdateProductResponse::create($product);
     }

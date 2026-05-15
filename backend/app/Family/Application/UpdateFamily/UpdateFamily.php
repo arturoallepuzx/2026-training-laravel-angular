@@ -29,11 +29,13 @@ class UpdateFamily
 
         $familyName = $name !== null ? FamilyName::create($name) : null;
 
-        if ($familyName !== null && ! $familyName->equals($family->name())) {
-            $existing = $this->familyRepository->findByNameAndRestaurantId($familyName, $restaurantUuid);
+        if ($familyName !== null && $familyName->value() !== $family->name()->value()) {
+            if (! $familyName->equals($family->name())) {
+                $existing = $this->familyRepository->findByNameAndRestaurantId($familyName, $restaurantUuid);
 
-            if ($existing !== null && $existing->id()->value() !== $family->id()->value()) {
-                throw FamilyNameAlreadyExistsException::forName($familyName->value());
+                if ($existing !== null && $existing->id()->value() !== $family->id()->value()) {
+                    throw FamilyNameAlreadyExistsException::forName($familyName->value());
+                }
             }
 
             $family->updateName($familyName);
@@ -43,7 +45,9 @@ class UpdateFamily
             $family->updateActive($active);
         }
 
-        $this->familyRepository->update($family);
+        if ($family->wasModified()) {
+            $this->familyRepository->update($family);
+        }
 
         return UpdateFamilyResponse::create($family);
     }

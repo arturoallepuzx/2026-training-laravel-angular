@@ -31,11 +31,13 @@ class UpdateTax
         $taxName = $name !== null ? TaxName::create($name) : null;
         $taxPercentage = $percentage !== null ? TaxPercentage::create($percentage) : null;
 
-        if ($taxName !== null && ! $taxName->equals($tax->name())) {
-            $existing = $this->taxRepository->findByNameAndRestaurantId($taxName, $restaurantUuid);
+        if ($taxName !== null && $taxName->value() !== $tax->name()->value()) {
+            if (! $taxName->equals($tax->name())) {
+                $existing = $this->taxRepository->findByNameAndRestaurantId($taxName, $restaurantUuid);
 
-            if ($existing !== null && $existing->id()->value() !== $tax->id()->value()) {
-                throw TaxNameAlreadyExistsException::forName($taxName->value());
+                if ($existing !== null && $existing->id()->value() !== $tax->id()->value()) {
+                    throw TaxNameAlreadyExistsException::forName($taxName->value());
+                }
             }
 
             $tax->updateName($taxName);
@@ -45,7 +47,9 @@ class UpdateTax
             $tax->updatePercentage($taxPercentage);
         }
 
-        $this->taxRepository->update($tax);
+        if ($tax->wasModified()) {
+            $this->taxRepository->update($tax);
+        }
 
         return UpdateTaxResponse::create($tax);
     }

@@ -29,17 +29,21 @@ class UpdateZone
 
         $zoneName = ZoneName::create($name);
 
-        if (! $zoneName->equals($zone->name())) {
-            $existing = $this->zoneRepository->findByNameAndRestaurantId($zoneName, $restaurantUuid);
+        if ($zoneName->value() !== $zone->name()->value()) {
+            if (! $zoneName->equals($zone->name())) {
+                $existing = $this->zoneRepository->findByNameAndRestaurantId($zoneName, $restaurantUuid);
 
-            if ($existing !== null && $existing->id()->value() !== $zone->id()->value()) {
-                throw ZoneNameAlreadyExistsException::forName($zoneName->value());
+                if ($existing !== null && $existing->id()->value() !== $zone->id()->value()) {
+                    throw ZoneNameAlreadyExistsException::forName($zoneName->value());
+                }
             }
 
             $zone->updateName($zoneName);
         }
 
-        $this->zoneRepository->update($zone);
+        if ($zone->wasModified()) {
+            $this->zoneRepository->update($zone);
+        }
 
         return UpdateZoneResponse::create($zone);
     }

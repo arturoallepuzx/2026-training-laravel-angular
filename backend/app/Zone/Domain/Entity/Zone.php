@@ -10,6 +10,8 @@ use App\Zone\Domain\ValueObject\ZoneName;
 
 class Zone
 {
+    private bool $modified = false;
+
     private function __construct(
         private Uuid $id,
         private Uuid $restaurantId,
@@ -51,6 +53,10 @@ class Zone
 
     public function updateName(ZoneName $name): void
     {
+        if ($this->name->value() === $name->value()) {
+            return;
+        }
+
         $this->name = $name;
         $this->touch();
     }
@@ -80,8 +86,14 @@ class Zone
         return $this->updatedAt;
     }
 
+    public function wasModified(): bool
+    {
+        return $this->modified;
+    }
+
     private function touch(): void
     {
+        $this->modified = true;
         $this->updatedAt = DomainDateTime::now();
     }
 }

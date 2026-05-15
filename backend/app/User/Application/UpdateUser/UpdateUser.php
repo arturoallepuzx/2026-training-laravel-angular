@@ -60,7 +60,9 @@ class UpdateUser
             $user->updateImageSrc($imageSrc);
         }
 
-        $this->userRepository->update($user);
+        if ($user->wasModified()) {
+            $this->userRepository->update($user);
+        }
 
         return UpdateUserResponse::create($user);
     }

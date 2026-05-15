@@ -40,11 +40,13 @@ class UpdateTable
         if ($zoneId !== null) {
             $newZoneId = Uuid::create($zoneId);
 
-            if (! $this->tableZoneExistsChecker->check($newZoneId, $restaurantUuid)) {
-                throw TableZoneNotFoundException::forId($newZoneId);
-            }
+            if ($newZoneId->value() !== $table->zoneId()->value()) {
+                if (! $this->tableZoneExistsChecker->check($newZoneId, $restaurantUuid)) {
+                    throw TableZoneNotFoundException::forId($newZoneId);
+                }
 
-            $targetZoneId = $newZoneId;
+                $targetZoneId = $newZoneId;
+            }
         }
 
         if ($name !== null) {
@@ -52,17 +54,20 @@ class UpdateTable
         }
 
         $zoneChanged = $targetZoneId->value() !== $table->zoneId()->value();
-        $nameChanged = ! $targetName->equals($table->name());
+        $nameChanged = $targetName->value() !== $table->name()->value();
+        $canonicalNameChanged = ! $targetName->equals($table->name());
 
         if ($zoneChanged || $nameChanged) {
-            $existing = $this->tableRepository->findByNameAndZoneIdAndRestaurantId(
-                $targetName,
-                $targetZoneId,
-                $restaurantUuid,
-            );
+            if ($zoneChanged || $canonicalNameChanged) {
+                $existing = $this->tableRepository->findByNameAndZoneIdAndRestaurantId(
+                    $targetName,
+                    $targetZoneId,
+                    $restaurantUuid,
+                );
 
-            if ($existing !== null && $existing->id()->value() !== $table->id()->value()) {
-                throw TableNameAlreadyExistsException::forName($targetName->value());
+                if ($existing !== null && $existing->id()->value() !== $table->id()->value()) {
+                    throw TableNameAlreadyExistsException::forName($targetName->value());
+                }
             }
 
             if ($zoneChanged) {
@@ -74,7 +79,9 @@ class UpdateTable
             }
         }
 
-        $this->tableRepository->update($table);
+        if ($table->wasModified()) {
+            $this->tableRepository->update($table);
+        }
 
         return UpdateTableResponse::create($table);
     }

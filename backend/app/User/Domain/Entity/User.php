@@ -14,6 +14,8 @@ use App\User\Domain\ValueObject\UserPinHash;
 
 class User
 {
+    private bool $modified = false;
+
     private function __construct(
         private Uuid $id,
         private Uuid $restaurantId,
@@ -80,30 +82,50 @@ class User
 
     public function updateName(UserName $name): void
     {
+        if ($this->name->value() === $name->value()) {
+            return;
+        }
+
         $this->name = $name;
         $this->touch();
     }
 
     public function updateEmail(Email $email): void
     {
+        if ($this->email->value() === $email->value()) {
+            return;
+        }
+
         $this->email = $email;
         $this->touch();
     }
 
     public function updateRole(UserRole $role): void
     {
+        if ($this->role->equals($role)) {
+            return;
+        }
+
         $this->role = $role;
         $this->touch();
     }
 
     public function updateImageSrc(?string $imageSrc): void
     {
+        if ($this->imageSrc === $imageSrc) {
+            return;
+        }
+
         $this->imageSrc = $imageSrc;
         $this->touch();
     }
 
     public function changePassword(PasswordHash $passwordHash): void
     {
+        if ($this->passwordHash->value() === $passwordHash->value()) {
+            return;
+        }
+
         $this->passwordHash = $passwordHash;
         $this->touch();
     }
@@ -158,8 +180,14 @@ class User
         return $this->updatedAt;
     }
 
+    public function wasModified(): bool
+    {
+        return $this->modified;
+    }
+
     private function touch(): void
     {
+        $this->modified = true;
         $this->updatedAt = DomainDateTime::now();
     }
 }

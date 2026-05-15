@@ -13,6 +13,8 @@ use App\Shared\Domain\ValueObject\Uuid;
 
 class Product
 {
+    private bool $modified = false;
+
     private function __construct(
         private Uuid $id,
         private Uuid $restaurantId,
@@ -84,42 +86,70 @@ class Product
 
     public function updateFamilyId(Uuid $familyId): void
     {
+        if ($this->familyId->value() === $familyId->value()) {
+            return;
+        }
+
         $this->familyId = $familyId;
         $this->touch();
     }
 
     public function updateTaxId(Uuid $taxId): void
     {
+        if ($this->taxId->value() === $taxId->value()) {
+            return;
+        }
+
         $this->taxId = $taxId;
         $this->touch();
     }
 
     public function updateImageSrc(?ProductImageSrc $imageSrc): void
     {
+        if ($this->imageSrc?->value() === $imageSrc?->value()) {
+            return;
+        }
+
         $this->imageSrc = $imageSrc;
         $this->touch();
     }
 
     public function updateName(ProductName $name): void
     {
+        if ($this->name->value() === $name->value()) {
+            return;
+        }
+
         $this->name = $name;
         $this->touch();
     }
 
     public function updatePrice(ProductPrice $price): void
     {
+        if ($this->price->value() === $price->value()) {
+            return;
+        }
+
         $this->price = $price;
         $this->touch();
     }
 
     public function updateStock(ProductStock $stock): void
     {
+        if ($this->stock->value() === $stock->value()) {
+            return;
+        }
+
         $this->stock = $stock;
         $this->touch();
     }
 
     public function updateActive(bool $active): void
     {
+        if ($this->active === $active) {
+            return;
+        }
+
         $this->active = $active;
         $this->touch();
     }
@@ -179,8 +209,14 @@ class Product
         return $this->updatedAt;
     }
 
+    public function wasModified(): bool
+    {
+        return $this->modified;
+    }
+
     private function touch(): void
     {
+        $this->modified = true;
         $this->updatedAt = DomainDateTime::now();
     }
 }

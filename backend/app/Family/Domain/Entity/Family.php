@@ -10,6 +10,8 @@ use App\Shared\Domain\ValueObject\Uuid;
 
 class Family
 {
+    private bool $modified = false;
+
     private function __construct(
         private Uuid $id,
         private Uuid $restaurantId,
@@ -56,12 +58,20 @@ class Family
 
     public function updateName(FamilyName $name): void
     {
+        if ($this->name->value() === $name->value()) {
+            return;
+        }
+
         $this->name = $name;
         $this->touch();
     }
 
     public function updateActive(bool $active): void
     {
+        if ($this->active === $active) {
+            return;
+        }
+
         $this->active = $active;
         $this->touch();
     }
@@ -96,8 +106,14 @@ class Family
         return $this->updatedAt;
     }
 
+    public function wasModified(): bool
+    {
+        return $this->modified;
+    }
+
     private function touch(): void
     {
+        $this->modified = true;
         $this->updatedAt = DomainDateTime::now();
     }
 }

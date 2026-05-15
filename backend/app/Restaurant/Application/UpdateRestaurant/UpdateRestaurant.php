@@ -60,7 +60,9 @@ class UpdateRestaurant
             }
         }
 
-        $this->restaurantRepository->update($restaurant);
+        if ($restaurant->wasModified()) {
+            $this->restaurantRepository->update($restaurant);
+        }
 
         return UpdateRestaurantResponse::create($restaurant);
     }

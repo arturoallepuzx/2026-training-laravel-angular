@@ -13,6 +13,8 @@ use App\Shared\Domain\ValueObject\Uuid;
 
 class Restaurant
 {
+    private bool $modified = false;
+
     private function __construct(
         private Uuid $id,
         private RestaurantName $name,
@@ -64,24 +66,40 @@ class Restaurant
 
     public function updateName(RestaurantName $name): void
     {
+        if ($this->name->value() === $name->value()) {
+            return;
+        }
+
         $this->name = $name;
         $this->touch();
     }
 
     public function updateLegalName(LegalName $legalName): void
     {
+        if ($this->legalName->value() === $legalName->value()) {
+            return;
+        }
+
         $this->legalName = $legalName;
         $this->touch();
     }
 
     public function updateTaxId(TaxId $taxId): void
     {
+        if ($this->taxId->value() === $taxId->value()) {
+            return;
+        }
+
         $this->taxId = $taxId;
         $this->touch();
     }
 
     public function updateEmail(Email $email): void
     {
+        if ($this->email->value() === $email->value()) {
+            return;
+        }
+
         $this->email = $email;
         $this->touch();
     }
@@ -121,8 +139,14 @@ class Restaurant
         return $this->updatedAt;
     }
 
+    public function wasModified(): bool
+    {
+        return $this->modified;
+    }
+
     private function touch(): void
     {
+        $this->modified = true;
         $this->updatedAt = DomainDateTime::now();
     }
 }
